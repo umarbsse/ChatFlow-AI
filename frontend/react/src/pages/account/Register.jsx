@@ -1,4 +1,5 @@
 import { useState } from "react";
+import api from "../../services/api";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -12,6 +13,8 @@ function Register() {
   });
 
   const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -22,8 +25,11 @@ function Register() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    setMessage("");
+    setErrors({});
 
     if (formData.password !== formData.password_confirmation) {
       setMessage("Passwords do not match.");
@@ -35,8 +41,40 @@ function Register() {
       return;
     }
 
-    console.log("Register Data:", formData);
-    setMessage("Registration successful.");
+    try {
+      setLoading(true);
+
+      const response = await api.post("/user/register", {
+        name: formData.name,
+        username: formData.username,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        password_confirmation: formData.password_confirmation,
+        terms: formData.terms,
+      });
+
+      setMessage(response.data.message || "Registration successful.");
+
+      setFormData({
+        name: "",
+        username: "",
+        email: "",
+        phone: "",
+        password: "",
+        password_confirmation: "",
+        terms: false,
+      });
+    } catch (error) {
+      if (error.response?.status === 422) {
+        setErrors(error.response.data.errors || {});
+        setMessage("Please fix the validation errors.");
+      } else {
+        setMessage("Server error. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -62,7 +100,10 @@ function Register() {
                     </p>
 
                     <div className="d-flex align-items-center mb-3">
-                      <span className="bg-white bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center me-3" style={{ width: "42px", height: "42px" }}>
+                      <span
+                        className="bg-white bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center me-3"
+                        style={{ width: "42px", height: "42px" }}
+                      >
                         <i className="fa-solid fa-bolt"></i>
                       </span>
                       <div>
@@ -74,7 +115,10 @@ function Register() {
                     </div>
 
                     <div className="d-flex align-items-center mb-3">
-                      <span className="bg-white bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center me-3" style={{ width: "42px", height: "42px" }}>
+                      <span
+                        className="bg-white bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center me-3"
+                        style={{ width: "42px", height: "42px" }}
+                      >
                         <i className="fa-solid fa-lock"></i>
                       </span>
                       <div>
@@ -86,7 +130,10 @@ function Register() {
                     </div>
 
                     <div className="d-flex align-items-center">
-                      <span className="bg-white bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center me-3" style={{ width: "42px", height: "42px" }}>
+                      <span
+                        className="bg-white bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center me-3"
+                        style={{ width: "42px", height: "42px" }}
+                      >
                         <i className="fa-solid fa-users"></i>
                       </span>
                       <div>
@@ -97,7 +144,10 @@ function Register() {
                       </div>
                     </div>
 
-                    <button type="button" className="btn btn-light fw-semibold px-4 py-2 mt-5">
+                    <button
+                      type="button"
+                      className="btn btn-light fw-semibold px-4 py-2 mt-5"
+                    >
                       <i className="fa-solid fa-circle-play me-2"></i>
                       Explore Features
                     </button>
@@ -150,13 +200,20 @@ function Register() {
                           <input
                             type="text"
                             name="name"
-                            className="form-control"
+                            className={`form-control ${
+                              errors.name ? "is-invalid" : ""
+                            }`}
                             placeholder="John Doe"
                             value={formData.name}
                             onChange={handleChange}
                             required
                           />
                         </div>
+                        {errors.name && (
+                          <div className="text-danger small mt-1">
+                            {errors.name[0]}
+                          </div>
+                        )}
                       </div>
 
                       <div className="col-md-6 mb-3">
@@ -170,13 +227,20 @@ function Register() {
                           <input
                             type="text"
                             name="username"
-                            className="form-control"
+                            className={`form-control ${
+                              errors.username ? "is-invalid" : ""
+                            }`}
                             placeholder="johndoe"
                             value={formData.username}
                             onChange={handleChange}
                             required
                           />
                         </div>
+                        {errors.username && (
+                          <div className="text-danger small mt-1">
+                            {errors.username[0]}
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -191,13 +255,20 @@ function Register() {
                         <input
                           type="email"
                           name="email"
-                          className="form-control"
+                          className={`form-control ${
+                            errors.email ? "is-invalid" : ""
+                          }`}
                           placeholder="john@example.com"
                           value={formData.email}
                           onChange={handleChange}
                           required
                         />
                       </div>
+                      {errors.email && (
+                        <div className="text-danger small mt-1">
+                          {errors.email[0]}
+                        </div>
+                      )}
                       <div className="form-text">
                         We will never share your email with anyone else.
                       </div>
@@ -214,12 +285,19 @@ function Register() {
                         <input
                           type="tel"
                           name="phone"
-                          className="form-control"
+                          className={`form-control ${
+                            errors.phone ? "is-invalid" : ""
+                          }`}
                           placeholder="+92 300 1234567"
                           value={formData.phone}
                           onChange={handleChange}
                         />
                       </div>
+                      {errors.phone && (
+                        <div className="text-danger small mt-1">
+                          {errors.phone[0]}
+                        </div>
+                      )}
                     </div>
 
                     <div className="row">
@@ -234,13 +312,20 @@ function Register() {
                           <input
                             type="password"
                             name="password"
-                            className="form-control"
+                            className={`form-control ${
+                              errors.password ? "is-invalid" : ""
+                            }`}
                             placeholder="Password"
                             value={formData.password}
                             onChange={handleChange}
                             required
                           />
                         </div>
+                        {errors.password && (
+                          <div className="text-danger small mt-1">
+                            {errors.password[0]}
+                          </div>
+                        )}
                       </div>
 
                       <div className="col-md-6 mb-3">
@@ -265,27 +350,50 @@ function Register() {
                     </div>
 
                     <div className="d-flex justify-content-between align-items-center mb-4">
-                      <div className="form-check">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          name="terms"
-                          id="terms"
-                          checked={formData.terms}
-                          onChange={handleChange}
-                        />
-                        <label className="form-check-label" htmlFor="terms">
-                          I agree to the{" "}
-                          <a href="/terms" className="text-decoration-none">
-                            Terms
-                          </a>
-                        </label>
+                      <div>
+                        <div className="form-check">
+                          <input
+                            className={`form-check-input ${
+                              errors.terms ? "is-invalid" : ""
+                            }`}
+                            type="checkbox"
+                            name="terms"
+                            id="terms"
+                            checked={formData.terms}
+                            onChange={handleChange}
+                          />
+                          <label className="form-check-label" htmlFor="terms">
+                            I agree to the{" "}
+                            <a href="/terms" className="text-decoration-none">
+                              Terms
+                            </a>
+                          </label>
+                        </div>
+
+                        {errors.terms && (
+                          <div className="text-danger small mt-1">
+                            {errors.terms[0]}
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    <button type="submit" className="btn btn-primary btn-lg w-100 fw-semibold">
-                      <i className="fa-solid fa-user-plus me-2"></i>
-                      Create Account
+                    <button
+                      type="submit"
+                      className="btn btn-primary btn-lg w-100 fw-semibold"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-2"></span>
+                          Creating Account...
+                        </>
+                      ) : (
+                        <>
+                          <i className="fa-solid fa-user-plus me-2"></i>
+                          Create Account
+                        </>
+                      )}
                     </button>
 
                     <div className="position-relative text-center my-4">
@@ -297,14 +405,20 @@ function Register() {
 
                     <div className="row g-2">
                       <div className="col-md-6">
-                        <button type="button" className="btn btn-outline-dark w-100">
+                        <button
+                          type="button"
+                          className="btn btn-outline-dark w-100"
+                        >
                           <i className="fa-brands fa-google me-2"></i>
                           Google
                         </button>
                       </div>
 
                       <div className="col-md-6">
-                        <button type="button" className="btn btn-outline-primary w-100">
+                        <button
+                          type="button"
+                          className="btn btn-outline-primary w-100"
+                        >
                           <i className="fa-brands fa-facebook-f me-2"></i>
                           Facebook
                         </button>
@@ -313,7 +427,10 @@ function Register() {
 
                     <p className="text-center text-muted mt-4 mb-0">
                       Already have an account?{" "}
-                      <a href="/login" className="text-decoration-none fw-semibold">
+                      <a
+                        href="/login"
+                        className="text-decoration-none fw-semibold"
+                      >
                         Login here
                       </a>
                     </p>
