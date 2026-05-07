@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 
 function Register() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     username: "",
@@ -65,6 +68,10 @@ function Register() {
         password_confirmation: "",
         terms: false,
       });
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
     } catch (error) {
       if (error.response?.status === 422) {
         setErrors(error.response.data.errors || {});
@@ -193,10 +200,12 @@ function Register() {
                         <label className="form-label fw-semibold">
                           Full Name
                         </label>
+
                         <div className="input-group input-group-lg">
                           <span className="input-group-text bg-light">
                             <i className="fa-solid fa-user text-primary"></i>
                           </span>
+
                           <input
                             type="text"
                             name="name"
@@ -209,6 +218,7 @@ function Register() {
                             required
                           />
                         </div>
+
                         {errors.name && (
                           <div className="text-danger small mt-1">
                             {errors.name[0]}
@@ -220,10 +230,12 @@ function Register() {
                         <label className="form-label fw-semibold">
                           Username
                         </label>
+
                         <div className="input-group input-group-lg">
                           <span className="input-group-text bg-light">
                             <i className="fa-solid fa-at text-primary"></i>
                           </span>
+
                           <input
                             type="text"
                             name="username"
@@ -236,6 +248,7 @@ function Register() {
                             required
                           />
                         </div>
+
                         {errors.username && (
                           <div className="text-danger small mt-1">
                             {errors.username[0]}
@@ -248,10 +261,12 @@ function Register() {
                       <label className="form-label fw-semibold">
                         Email Address
                       </label>
+
                       <div className="input-group input-group-lg">
                         <span className="input-group-text bg-light">
                           <i className="fa-solid fa-envelope text-primary"></i>
                         </span>
+
                         <input
                           type="email"
                           name="email"
@@ -264,11 +279,13 @@ function Register() {
                           required
                         />
                       </div>
+
                       {errors.email && (
                         <div className="text-danger small mt-1">
                           {errors.email[0]}
                         </div>
                       )}
+
                       <div className="form-text">
                         We will never share your email with anyone else.
                       </div>
@@ -278,10 +295,12 @@ function Register() {
                       <label className="form-label fw-semibold">
                         Phone Number
                       </label>
+
                       <div className="input-group input-group-lg">
                         <span className="input-group-text bg-light">
                           <i className="fa-solid fa-phone text-primary"></i>
                         </span>
+
                         <input
                           type="tel"
                           name="phone"
@@ -293,6 +312,7 @@ function Register() {
                           onChange={handleChange}
                         />
                       </div>
+
                       {errors.phone && (
                         <div className="text-danger small mt-1">
                           {errors.phone[0]}
@@ -305,10 +325,12 @@ function Register() {
                         <label className="form-label fw-semibold">
                           Password
                         </label>
+
                         <div className="input-group input-group-lg">
                           <span className="input-group-text bg-light">
                             <i className="fa-solid fa-lock text-primary"></i>
                           </span>
+
                           <input
                             type="password"
                             name="password"
@@ -321,6 +343,7 @@ function Register() {
                             required
                           />
                         </div>
+
                         {errors.password && (
                           <div className="text-danger small mt-1">
                             {errors.password[0]}
@@ -332,10 +355,12 @@ function Register() {
                         <label className="form-label fw-semibold">
                           Confirm Password
                         </label>
+
                         <div className="input-group input-group-lg">
                           <span className="input-group-text bg-light">
                             <i className="fa-solid fa-shield-halved text-primary"></i>
                           </span>
+
                           <input
                             type="password"
                             name="password_confirmation"
@@ -362,6 +387,7 @@ function Register() {
                             checked={formData.terms}
                             onChange={handleChange}
                           />
+
                           <label className="form-check-label" htmlFor="terms">
                             I agree to the{" "}
                             <a href="/terms" className="text-decoration-none">
