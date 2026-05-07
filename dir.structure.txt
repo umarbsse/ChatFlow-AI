@@ -1,0 +1,273 @@
+openai-realtime-chat/
+│
+├── backend/                         # Laravel headless API
+│   ├── app/
+│   │   ├── Console/
+│   │   ├── Exceptions/
+│   │   │
+│   │   ├── Http/
+│   │   │   ├── Controllers/
+│   │   │   │   └── Api/
+│   │   │   │       └── V1/
+│   │   │   │           ├── Auth/
+│   │   │   │           │   ├── LoginController.php
+│   │   │   │           │   ├── RegisterController.php
+│   │   │   │           │   └── LogoutController.php
+│   │   │   │           │
+│   │   │   │           ├── Chat/
+│   │   │   │           │   ├── ConversationController.php
+│   │   │   │           │   ├── MessageController.php
+│   │   │   │           │   └── StreamChatController.php
+│   │   │   │           │
+│   │   │   │           └── UserController.php
+│   │   │   │
+│   │   │   ├── Middleware/
+│   │   │   ├── Requests/
+│   │   │   │   └── Api/
+│   │   │   │       └── V1/
+│   │   │   │           ├── Auth/
+│   │   │   │           └── Chat/
+│   │   │   │
+│   │   │   └── Resources/
+│   │   │       └── Api/
+│   │   │           └── V1/
+│   │   │               ├── ConversationResource.php
+│   │   │               ├── MessageResource.php
+│   │   │               └── UserResource.php
+│   │   │
+│   │   ├── Models/
+│   │   │   ├── User.php
+│   │   │   ├── Conversation.php
+│   │   │   ├── Message.php
+│   │   │   └── AiUsageLog.php
+│   │   │
+│   │   ├── Services/
+│   │   │   ├── OpenAI/
+│   │   │   │   ├── OpenAIClient.php
+│   │   │   │   ├── ChatCompletionService.php
+│   │   │   │   ├── StreamingChatService.php
+│   │   │   │   └── TokenUsageService.php
+│   │   │   │
+│   │   │   ├── Chat/
+│   │   │   │   ├── ConversationService.php
+│   │   │   │   ├── MessageService.php
+│   │   │   │   └── ChatContextBuilder.php
+│   │   │   │
+│   │   │   └── Auth/
+│   │   │       └── AuthService.php
+│   │   │
+│   │   ├── Actions/
+│   │   │   ├── Chat/
+│   │   │   │   ├── CreateConversationAction.php
+│   │   │   │   ├── SendMessageAction.php
+│   │   │   │   └── GenerateAiReplyAction.php
+│   │   │   │
+│   │   │   └── Auth/
+│   │   │       └── CreateUserAction.php
+│   │   │
+│   │   ├── DTOs/
+│   │   │   ├── Chat/
+│   │   │   │   ├── SendMessageData.php
+│   │   │   │   └── OpenAIMessageData.php
+│   │   │   │
+│   │   │   └── Auth/
+│   │   │
+│   │   ├── Enums/
+│   │   │   ├── MessageRole.php
+│   │   │   └── ConversationStatus.php
+│   │   │
+│   │   ├── Policies/
+│   │   ├── Providers/
+│   │   ├── Jobs/
+│   │   │   ├── ProcessChatMessageJob.php
+│   │   │   └── StoreAiUsageJob.php
+│   │   │
+│   │   ├── Events/
+│   │   │   ├── MessageCreated.php
+│   │   │   └── AiResponseStreamed.php
+│   │   │
+│   │   └── Listeners/
+│   │
+│   ├── bootstrap/
+│   ├── config/
+│   │   ├── app.php
+│   │   ├── auth.php
+│   │   ├── cors.php
+│   │   ├── database.php
+│   │   ├── queue.php
+│   │   └── openai.php                 # Custom OpenAI config
+│   │
+│   ├── database/
+│   │   ├── factories/
+│   │   ├── migrations/
+│   │   │   ├── create_users_table.php
+│   │   │   ├── create_conversations_table.php
+│   │   │   ├── create_messages_table.php
+│   │   │   └── create_ai_usage_logs_table.php
+│   │   │
+│   │   └── seeders/
+│   │
+│   ├── routes/
+│   │   ├── api.php                    # Main API routes
+│   │   ├── api_v1.php                 # Optional versioned routes
+│   │   ├── channels.php               # Broadcasting channels
+│   │   └── console.php
+│   │
+│   ├── storage/
+│   ├── tests/
+│   │   ├── Feature/
+│   │   │   ├── Auth/
+│   │   │   └── Chat/
+│   │   │       ├── ConversationTest.php
+│   │   │       ├── MessageTest.php
+│   │   │       └── StreamingChatTest.php
+│   │   │
+│   │   └── Unit/
+│   │       ├── Services/
+│   │       └── Actions/
+│   │
+│   ├── composer.json
+│   ├── artisan
+│   ├── .env
+│   └── .env.example
+│
+├── frontend/                         # React.js SPA
+│   ├── public/
+│   │   ├── favicon.ico
+│   │   └── robots.txt
+│   │
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── App.jsx
+│   │   │   ├── providers/
+│   │   │   │   ├── AuthProvider.jsx
+│   │   │   │   ├── QueryProvider.jsx
+│   │   │   │   └── ThemeProvider.jsx
+│   │   │   │
+│   │   │   └── router/
+│   │   │       ├── index.jsx
+│   │   │       ├── protected-routes.jsx
+│   │   │       └── guest-routes.jsx
+│   │   │
+│   │   ├── assets/
+│   │   │   ├── images/
+│   │   │   ├── icons/
+│   │   │   └── styles/
+│   │   │       ├── globals.css
+│   │   │       └── variables.css
+│   │   │
+│   │   ├── components/
+│   │   │   ├── ui/
+│   │   │   │   ├── Button.jsx
+│   │   │   │   ├── Input.jsx
+│   │   │   │   ├── Modal.jsx
+│   │   │   │   └── Spinner.jsx
+│   │   │   │
+│   │   │   ├── layout/
+│   │   │   │   ├── AppLayout.jsx
+│   │   │   │   ├── Sidebar.jsx
+│   │   │   │   └── Header.jsx
+│   │   │   │
+│   │   │   └── feedback/
+│   │   │       ├── ErrorMessage.jsx
+│   │   │       └── EmptyState.jsx
+│   │   │
+│   │   ├── features/
+│   │   │   ├── auth/
+│   │   │   │   ├── api/
+│   │   │   │   │   └── authApi.js
+│   │   │   │   ├── components/
+│   │   │   │   │   ├── LoginForm.jsx
+│   │   │   │   │   └── RegisterForm.jsx
+│   │   │   │   ├── hooks/
+│   │   │   │   │   └── useAuth.js
+│   │   │   │   ├── pages/
+│   │   │   │   │   ├── LoginPage.jsx
+│   │   │   │   │   └── RegisterPage.jsx
+│   │   │   │   └── store/
+│   │   │   │       └── authStore.js
+│   │   │   │
+│   │   │   └── chat/
+│   │   │       ├── api/
+│   │   │       │   └── chatApi.js
+│   │   │       ├── components/
+│   │   │       │   ├── ChatWindow.jsx
+│   │   │       │   ├── MessageList.jsx
+│   │   │       │   ├── MessageBubble.jsx
+│   │   │       │   ├── ChatInput.jsx
+│   │   │       │   ├── ConversationList.jsx
+│   │   │       │   └── StreamingMessage.jsx
+│   │   │       ├── hooks/
+│   │   │       │   ├── useConversations.js
+│   │   │       │   ├── useMessages.js
+│   │   │       │   └── useStreamingChat.js
+│   │   │       ├── pages/
+│   │   │       │   └── ChatPage.jsx
+│   │   │       ├── store/
+│   │   │       │   └── chatStore.js
+│   │   │       └── utils/
+│   │   │           └── formatMessage.js
+│   │   │
+│   │   ├── lib/
+│   │   │   ├── axios.js
+│   │   │   ├── echo.js                 # Laravel Echo / WebSocket setup
+│   │   │   ├── queryClient.js
+│   │   │   └── constants.js
+│   │   │
+│   │   ├── hooks/
+│   │   │   ├── useDebounce.js
+│   │   │   └── useLocalStorage.js
+│   │   │
+│   │   ├── utils/
+│   │   │   ├── cn.js
+│   │   │   ├── date.js
+│   │   │   └── errors.js
+│   │   │
+│   │   ├── types/                      # If using TypeScript, use .ts/.tsx
+│   │   │   ├── auth.js
+│   │   │   └── chat.js
+│   │   │
+│   │   ├── main.jsx
+│   │   └── index.css
+│   │
+│   ├── tests/
+│   │   ├── components/
+│   │   ├── features/
+│   │   └── e2e/
+│   │
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── .env
+│   └── .env.example
+│
+├── docker/
+│   ├── backend/
+│   │   └── Dockerfile
+│   ├── frontend/
+│   │   └── Dockerfile
+│   ├── nginx/
+│   │   └── default.conf
+│   └── supervisor/
+│       └── laravel-worker.conf
+│
+├── docs/
+│   ├── api.md
+│   ├── architecture.md
+│   ├── deployment.md
+│   └── realtime-chat-flow.md
+│
+├── scripts/
+│   ├── setup.sh
+│   ├── backend-test.sh
+│   └── frontend-test.sh
+│
+├── .github/
+│   └── workflows/
+│       ├── backend-ci.yml
+│       ├── frontend-ci.yml
+│       └── deploy.yml
+│
+├── docker-compose.yml
+├── README.md
+├── .gitignore
+└── .env.example
