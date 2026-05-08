@@ -75,6 +75,7 @@
 
 .chat-list-content {
   min-width: 0;
+  flex: 1;
   display: flex;
   flex-direction: column;
 }
@@ -90,6 +91,43 @@
 .chat-list-time {
   font-size: 12px;
   color: #9ca3af;
+}
+
+/* Chat Dropdown */
+
+.chat-dropdown {
+  width: 100%;
+}
+
+.chat-dropdown-menu {
+  margin-top: 2px;
+  margin-left: 18px;
+  padding-left: 12px;
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.chat-dropdown-item {
+  position: relative;
+  padding-left: 0;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.chat-dropdown-item .chat-list-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  font-size: 12px;
+  background: #1f2937;
+}
+
+.chat-dropdown-item .chat-list-title {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.chat-dropdown-item .chat-list-time {
+  font-size: 11px;
 }
 
 .chat-sidebar-bottom {

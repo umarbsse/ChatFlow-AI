@@ -5,6 +5,7 @@ import Login from "./pages/account/Login";
 import ForgotPassword from "./pages/account/ForgotPassword";
 import Home from "./pages/home/Home";
 import Chat from "./pages/chat/Chat";
+import Dashboard from "./pages/dashboard/Dashboard";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
 
         <Route path="/home" element={<Home />} />
         <Route path="/chat" element={<Chat />} />
+        <Route path="/dashboard" element={<Dashboard />} />
 
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
