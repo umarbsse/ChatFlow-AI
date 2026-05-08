@@ -39,12 +39,17 @@ function Login() {
         remember: formData.remember,
       });
 
-      const token = response.data.token || response.data.access_token;
-      const user = response.data.user;
+      const token = response.data.data?.token;
+      const tokenType = response.data.data?.token_type || "Bearer";
+      const user = response.data.data?.user;
 
-      if (token) {
-        localStorage.setItem("auth_token", token);
+      if (!token) {
+        setMessage("Login successful, but token was not returned from API.");
+        return;
       }
+
+      localStorage.setItem("auth_token", token);
+      localStorage.setItem("token_type", tokenType);
 
       if (user) {
         localStorage.setItem("auth_user", JSON.stringify(user));
@@ -52,9 +57,7 @@ function Login() {
 
       setMessage(response.data.message || "Login successful.");
 
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1000);
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       if (error.response?.status === 422) {
         setErrors(error.response.data.errors || {});
@@ -139,6 +142,7 @@ function Login() {
                     <button
                       type="button"
                       className="btn btn-light fw-semibold px-4 py-2 mt-5"
+                      onClick={() => navigate("/chat")}
                     >
                       <i className="fa-solid fa-comments me-2"></i>
                       Open Chat

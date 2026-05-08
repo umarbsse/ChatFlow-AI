@@ -3,25 +3,40 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Register from "./pages/account/Register";
 import Login from "./pages/account/Login";
 import ForgotPassword from "./pages/account/ForgotPassword";
+import AccountSettings from "./pages/account/AccountSettings";
+import ChangePassword from "./pages/account/ChangePassword";
+
 import Home from "./pages/home/Home";
 import Chat from "./pages/chat/Chat";
 import Dashboard from "./pages/dashboard/Dashboard";
+
+import ProtectedRoute from "./components/ProtectedRoute";
+import Logout from "./pages/account/Logout";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
-
-        <Route path="/home" element={<Home />} />
-        <Route path="/chat" element={<Chat />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-
+        {/* Public routes */}
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        <Route path="*" element={<Navigate to="/chat" />} />
+        {/* Protected routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/chat/:id" element={<Chat />} />
+
+          <Route path="/account-settings" element={<AccountSettings />} />
+          <Route path="/change-password" element={<ChangePassword />} />
+          <Route path="/logout" element={<Logout />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
