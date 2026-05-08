@@ -1,16 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import api from "../services/api";
 
-function LeftNavbar() {
+function LeftNavbar({ refreshKey }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [isChatsOpen, setIsChatsOpen] = useState(true);
+  const isChatRoute =
+    location.pathname === "/chat" || location.pathname.startsWith("/chat/");
 
-  const chats = [
-    { id: 1, title: "React Laravel Chat App", time: "Today" },
-    { id: 20, title: "User authentication setup", time: "Yesterday" },
-  ];
+  const [isChatsOpen, setIsChatsOpen] = useState(isChatRoute);
+  const [chats, setChats] = useState([]);
+  const [loadingChats, setLoadingChats] = useState(false);
 
   const sidebarLinks = [
     {
@@ -39,12 +40,38 @@ function LeftNavbar() {
     },
   ];
 
+  useEffect(() => {
+    setIsChatsOpen(isChatRoute);
+  }, [isChatRoute]);
+
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        setLoadingChats(true);
+
+        const response = await api.get("/chat/list");
+
+        const chatList =
+          response.data.data?.chats ||
+          response.data.chats ||
+          response.data.data ||
+          [];
+
+        setChats(chatList);
+      } catch (error) {
+        console.log("Failed to fetch chats:", error);
+        setChats([]);
+      } finally {
+        setLoadingChats(false);
+      }
+    };
+
+    fetchChats();
+  }, [refreshKey]);
+
   const isActivePath = (path) => {
     if (path === "/chat") {
-      return (
-        location.pathname === "/chat" ||
-        location.pathname.startsWith("/chat/")
-      );
+      return isChatRoute;
     }
 
     return location.pathname === path;
@@ -52,6 +79,15 @@ function LeftNavbar() {
 
   const isActiveChat = (chatId) => {
     return location.pathname === `/chat/${chatId}`;
+  };
+
+  const handleChatMenuClick = () => {
+    if (!isChatRoute) {
+      navigate("/chat");
+      return;
+    }
+
+    setIsChatsOpen((previousValue) => !previousValue);
   };
 
   const handleChatClick = (chatId) => {
@@ -96,7 +132,7 @@ function LeftNavbar() {
                   className={`chat-list-item ${
                     isActivePath(link.path) ? "active" : ""
                   }`}
-                  onClick={() => setIsChatsOpen(!isChatsOpen)}
+                  onClick={handleChatMenuClick}
                 >
                   <span className="chat-list-icon">
                     <i className={link.icon}></i>
@@ -115,27 +151,61 @@ function LeftNavbar() {
                   </span>
                 </button>
 
-                {isChatsOpen && (
+                {isChatRoute && isChatsOpen && (
                   <div className="chat-dropdown-menu">
-                    {chats.map((chat) => (
-                      <button
-                        key={`chat-${chat.id}`}
-                        type="button"
-                        className={`chat-list-item chat-dropdown-item ${
-                          isActiveChat(chat.id) ? "active" : ""
-                        }`}
-                        onClick={() => handleChatClick(chat.id)}
-                      >
+                    {loadingChats && (
+                      <div className="chat-list-item chat-dropdown-item">
+                        <span className="chat-list-icon">
+                          <span className="spinner-border spinner-border-sm"></span>
+                        </span>
+
+                        <span className="chat-list-content">
+                          <span className="chat-list-title">
+                            Loading chats...
+                          </span>
+                        </span>
+                      </div>
+                    )}
+
+                    {!loadingChats && chats.length === 0 && (
+                      <div className="chat-list-item chat-dropdown-item">
                         <span className="chat-list-icon">
                           <i className="fa-regular fa-message"></i>
                         </span>
 
                         <span className="chat-list-content">
-                          <span className="chat-list-title">{chat.title}</span>
-                          <span className="chat-list-time">{chat.time}</span>
+                          <span className="chat-list-title">No chats found</span>
                         </span>
-                      </button>
-                    ))}
+                      </div>
+                    )}
+
+                    {!loadingChats &&
+                      chats.map((chat) => (
+                        <button
+                          key={`chat-${chat.id}`}
+                          type="button"
+                          className={`chat-list-item chat-dropdown-item ${
+                            isActiveChat(chat.id) ? "active" : ""
+                          }`}
+                          onClick={() => handleChatClick(chat.id)}
+                        >
+                          <span className="chat-list-icon">
+                            <i className="fa-regular fa-message"></i>
+                          </span>
+
+                          <span className="chat-list-content">
+                            <span className="chat-list-title">
+                              {chat.title ||
+                                chat.instance_title ||
+                                "Untitled Chat"}
+                            </span>
+
+                            <span className="chat-list-time">
+                              {chat.time || chat.added_at || ""}
+                            </span>
+                          </span>
+                        </button>
+                      ))}
                   </div>
                 )}
               </div>

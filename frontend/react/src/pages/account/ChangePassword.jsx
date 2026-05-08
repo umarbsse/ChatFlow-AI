@@ -1,6 +1,7 @@
 import { useState } from "react";
 import LeftNavbar from "../../components/LeftNavbar";
 import Header from "../../components/Header";
+import api from "../../services/api";
 
 function ChangePassword() {
   const [formData, setFormData] = useState({
@@ -11,6 +12,8 @@ function ChangePassword() {
 
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,10 +25,15 @@ function ChangePassword() {
 
     setSuccessMessage("");
     setErrorMessage("");
+    setErrors({});
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    setSuccessMessage("");
+    setErrorMessage("");
+    setErrors({});
 
     if (!formData.currentPassword.trim()) {
       setErrorMessage("Current password is required.");
@@ -47,15 +55,48 @@ function ChangePassword() {
       return;
     }
 
-    // Later you can call your Laravel API here.
-    console.log("Password changed:", formData);
+    try {
+      setLoading(true);
 
-    setSuccessMessage("Password changed successfully.");
+      const response = await api.post("/user/change-password", {
+        current_password: formData.currentPassword,
+        password: formData.newPassword,
+        password_confirmation: formData.confirmPassword,
+      });
+
+      setSuccessMessage(
+        response.data.message || "Password changed successfully."
+      );
+
+      setFormData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error) {
+      if (error.response?.status === 422) {
+        setErrors(error.response.data.errors || {});
+        setErrorMessage("Please fix the validation errors.");
+      } else if (error.response?.status === 401) {
+        setErrorMessage("Current password is incorrect.");
+      } else {
+        setErrorMessage("Failed to change password. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
     setFormData({
       currentPassword: "",
       newPassword: "",
       confirmPassword: "",
     });
+
+    setSuccessMessage("");
+    setErrorMessage("");
+    setErrors({});
   };
 
   return (
@@ -100,48 +141,70 @@ function ChangePassword() {
                   <label className="form-label fw-semibold">
                     Current Password
                   </label>
+
                   <div className="input-group">
                     <span className="input-group-text">
                       <i className="fa-solid fa-key"></i>
                     </span>
+
                     <input
                       type="password"
                       name="currentPassword"
-                      className="form-control"
+                      className={`form-control ${
+                        errors.current_password ? "is-invalid" : ""
+                      }`}
                       placeholder="Enter current password"
                       value={formData.currentPassword}
                       onChange={handleChange}
                     />
                   </div>
+
+                  {errors.current_password && (
+                    <div className="text-danger small mt-1">
+                      {errors.current_password[0]}
+                    </div>
+                  )}
                 </div>
 
                 <div className="mb-3">
                   <label className="form-label fw-semibold">
                     New Password
                   </label>
+
                   <div className="input-group">
                     <span className="input-group-text">
                       <i className="fa-solid fa-lock"></i>
                     </span>
+
                     <input
                       type="password"
                       name="newPassword"
-                      className="form-control"
+                      className={`form-control ${
+                        errors.password ? "is-invalid" : ""
+                      }`}
                       placeholder="Enter new password"
                       value={formData.newPassword}
                       onChange={handleChange}
                     />
                   </div>
+
+                  {errors.password && (
+                    <div className="text-danger small mt-1">
+                      {errors.password[0]}
+                    </div>
+                  )}
                 </div>
 
                 <div className="mb-4">
                   <label className="form-label fw-semibold">
                     Confirm Password
                   </label>
+
                   <div className="input-group">
                     <span className="input-group-text">
                       <i className="fa-solid fa-lock"></i>
                     </span>
+
                     <input
                       type="password"
                       name="confirmPassword"
@@ -157,20 +220,28 @@ function ChangePassword() {
                   <button
                     type="button"
                     className="btn btn-light rounded-pill"
-                    onClick={() =>
-                      setFormData({
-                        currentPassword: "",
-                        newPassword: "",
-                        confirmPassword: "",
-                      })
-                    }
+                    onClick={handleCancel}
+                    disabled={loading}
                   >
                     Cancel
                   </button>
 
-                  <button type="submit" className="btn btn-primary rounded-pill">
-                    <i className="fa-solid fa-floppy-disk me-2"></i>
-                    Update Password
+                  <button
+                    type="submit"
+                    className="btn btn-primary rounded-pill"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2"></span>
+                        Updating...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa-solid fa-floppy-disk me-2"></i>
+                        Update Password
+                      </>
+                    )}
                   </button>
                 </div>
               </form>
