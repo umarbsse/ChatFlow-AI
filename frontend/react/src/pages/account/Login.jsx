@@ -1,6 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../../services/api";
 
 function Login() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -8,6 +12,8 @@ function Login() {
   });
 
   const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -18,11 +24,49 @@ function Login() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("Login Data:", formData);
-    setMessage("Login submitted successfully.");
+    setMessage("");
+    setErrors({});
+
+    try {
+      setLoading(true);
+
+      const response = await api.post("/user/login", {
+        email: formData.email,
+        password: formData.password,
+        remember: formData.remember,
+      });
+
+      const token = response.data.token || response.data.access_token;
+      const user = response.data.user;
+
+      if (token) {
+        localStorage.setItem("auth_token", token);
+      }
+
+      if (user) {
+        localStorage.setItem("auth_user", JSON.stringify(user));
+      }
+
+      setMessage(response.data.message || "Login successful.");
+
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1000);
+    } catch (error) {
+      if (error.response?.status === 422) {
+        setErrors(error.response.data.errors || {});
+        setMessage("Please fix the validation errors.");
+      } else if (error.response?.status === 401) {
+        setMessage("Invalid email or password.");
+      } else {
+        setMessage("Server error. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -116,8 +160,21 @@ function Login() {
                   </div>
 
                   {message && (
-                    <div className="alert alert-success d-flex align-items-center">
-                      <i className="fa-solid fa-circle-check me-2"></i>
+                    <div
+                      className={`alert d-flex align-items-center ${
+                        message.includes("successful")
+                          ? "alert-success"
+                          : "alert-danger"
+                      }`}
+                      role="alert"
+                    >
+                      <i
+                        className={`fa-solid me-2 ${
+                          message.includes("successful")
+                            ? "fa-circle-check"
+                            : "fa-triangle-exclamation"
+                        }`}
+                      ></i>
                       <div>{message}</div>
                     </div>
                   )}
@@ -127,40 +184,60 @@ function Login() {
                       <label className="form-label fw-semibold">
                         Email Address
                       </label>
+
                       <div className="input-group input-group-lg">
                         <span className="input-group-text bg-light">
                           <i className="fa-solid fa-envelope text-primary"></i>
                         </span>
+
                         <input
                           type="email"
                           name="email"
-                          className="form-control"
+                          className={`form-control ${
+                            errors.email ? "is-invalid" : ""
+                          }`}
                           placeholder="john@example.com"
                           value={formData.email}
                           onChange={handleChange}
                           required
                         />
                       </div>
+
+                      {errors.email && (
+                        <div className="text-danger small mt-1">
+                          {errors.email[0]}
+                        </div>
+                      )}
                     </div>
 
                     <div className="mb-3">
                       <label className="form-label fw-semibold">
                         Password
                       </label>
+
                       <div className="input-group input-group-lg">
                         <span className="input-group-text bg-light">
                           <i className="fa-solid fa-lock text-primary"></i>
                         </span>
+
                         <input
                           type="password"
                           name="password"
-                          className="form-control"
+                          className={`form-control ${
+                            errors.password ? "is-invalid" : ""
+                          }`}
                           placeholder="Enter your password"
                           value={formData.password}
                           onChange={handleChange}
                           required
                         />
                       </div>
+
+                      {errors.password && (
+                        <div className="text-danger small mt-1">
+                          {errors.password[0]}
+                        </div>
+                      )}
                     </div>
 
                     <div className="d-flex justify-content-between align-items-center mb-4">
@@ -173,6 +250,7 @@ function Login() {
                           checked={formData.remember}
                           onChange={handleChange}
                         />
+
                         <label className="form-check-label" htmlFor="remember">
                           Remember me
                         </label>
@@ -186,9 +264,19 @@ function Login() {
                     <button
                       type="submit"
                       className="btn btn-primary btn-lg w-100 fw-semibold"
+                      disabled={loading}
                     >
-                      <i className="fa-solid fa-right-to-bracket me-2"></i>
-                      Login
+                      {loading ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-2"></span>
+                          Logging in...
+                        </>
+                      ) : (
+                        <>
+                          <i className="fa-solid fa-right-to-bracket me-2"></i>
+                          Login
+                        </>
+                      )}
                     </button>
 
                     <div className="position-relative text-center my-4">
@@ -200,7 +288,10 @@ function Login() {
 
                     <div className="row g-2">
                       <div className="col-md-6">
-                        <button type="button" className="btn btn-outline-dark w-100">
+                        <button
+                          type="button"
+                          className="btn btn-outline-dark w-100"
+                        >
                           <i className="fa-brands fa-google me-2"></i>
                           Google
                         </button>
@@ -219,7 +310,10 @@ function Login() {
 
                     <p className="text-center text-muted mt-4 mb-0">
                       Don&apos;t have an account?{" "}
-                      <a href="/register" className="text-decoration-none fw-semibold">
+                      <a
+                        href="/register"
+                        className="text-decoration-none fw-semibold"
+                      >
                         Register here
                       </a>
                     </p>
