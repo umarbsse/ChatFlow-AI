@@ -250,12 +250,234 @@
   padding: 13px 16px;
   line-height: 1.6;
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+  overflow-wrap: anywhere;
 }
 
 .chat-message-user .chat-message-bubble {
   background: #0d6efd;
   color: #ffffff;
   border-color: #0d6efd;
+}
+
+/* ChatGPT/OpenAI Markdown Response */
+
+.chat-markdown {
+  line-height: 1.7;
+  white-space: normal;
+  font-size: 15px;
+}
+
+.chat-markdown p {
+  margin: 0 0 12px;
+}
+
+.chat-markdown p:last-child {
+  margin-bottom: 0;
+}
+
+.chat-markdown strong {
+  font-weight: 700;
+}
+
+.chat-markdown em {
+  font-style: italic;
+}
+
+.chat-markdown ol,
+.chat-markdown ul {
+  margin: 8px 0 12px 20px;
+  padding-left: 18px;
+}
+
+.chat-markdown ol {
+  list-style-type: decimal;
+}
+
+.chat-markdown ul {
+  list-style-type: disc;
+}
+
+.chat-markdown li {
+  margin-bottom: 6px;
+  padding-left: 2px;
+}
+
+.chat-markdown li > p {
+  margin-bottom: 6px;
+}
+
+.chat-markdown li > ul,
+.chat-markdown li > ol {
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
+.chat-markdown h1,
+.chat-markdown h2,
+.chat-markdown h3,
+.chat-markdown h4,
+.chat-markdown h5,
+.chat-markdown h6 {
+  margin: 14px 0 8px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.chat-markdown h1 {
+  font-size: 22px;
+}
+
+.chat-markdown h2 {
+  font-size: 20px;
+}
+
+.chat-markdown h3 {
+  font-size: 18px;
+}
+
+.chat-markdown h4,
+.chat-markdown h5,
+.chat-markdown h6 {
+  font-size: 16px;
+}
+
+.chat-markdown a {
+  color: #0d6efd;
+  text-decoration: underline;
+  word-break: break-word;
+}
+
+.chat-markdown blockquote {
+  margin: 10px 0;
+  padding: 8px 12px;
+  border-left: 4px solid #d1d5db;
+  background: #f9fafb;
+  color: #374151;
+  border-radius: 8px;
+}
+
+.chat-markdown code {
+  padding: 2px 5px;
+  border-radius: 5px;
+  background: #f3f4f6;
+  color: #111827;
+  font-size: 0.92em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", monospace;
+}
+
+.chat-markdown pre {
+  margin: 12px 0;
+  padding: 14px;
+  border-radius: 12px;
+  overflow-x: auto;
+  background: #111827;
+  color: #f9fafb;
+}
+
+.chat-markdown pre code {
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  border-radius: 0;
+  font-size: 14px;
+}
+
+.chat-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+.chat-markdown th,
+.chat-markdown td {
+  border: 1px solid #e5e7eb;
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.chat-markdown th {
+  background: #f3f4f6;
+  font-weight: 700;
+}
+
+.chat-markdown hr {
+  border: 0;
+  border-top: 1px solid #e5e7eb;
+  margin: 16px 0;
+}
+
+.chat-plain-text {
+  white-space: pre-wrap;
+}
+
+.chat-message-user .chat-plain-text {
+  color: #ffffff;
+}
+
+/* File Message */
+
+.chat-file-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+  min-width: 240px;
+}
+
+.chat-file-link:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+.chat-file-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #eef2ff;
+  color: #4f46e5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+.chat-message-user .chat-file-icon {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.chat-file-info {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-file-name {
+  font-weight: 700;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.chat-file-action {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.chat-message-user .chat-file-action {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.chat-file-download-icon {
+  font-size: 15px;
+  opacity: 0.75;
 }
 
 /* Footer Input */
@@ -312,6 +534,12 @@
   background: #0b5ed7;
 }
 
+.chat-send-btn:disabled,
+.chat-form-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .chat-footer-note {
   display: block;
   text-align: center;
@@ -362,5 +590,13 @@
 
   .chat-welcome-box h3 {
     font-size: 22px;
+  }
+
+  .chat-markdown {
+    font-size: 14px;
+  }
+
+  .chat-markdown pre {
+    padding: 12px;
   }
 }

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import LeftNavbar from "../../components/LeftNavbar";
 import Header from "../../components/Header";
 import api from "../../services/api";
@@ -11,12 +13,14 @@ function Chat() {
   const chatInstanceId = id ? Number(id) : null;
 
   const [message, setMessage] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
   const [sending, setSending] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [chatListRefreshKey, setChatListRefreshKey] = useState(0);
 
   const chatBottomRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const [messages, setMessages] = useState([]);
 
@@ -42,6 +46,10 @@ function Chat() {
           id: item.id,
           sender: Number(item.chat_owner) === 1 ? "user" : "assistant",
           text: item.msg,
+          msgType: Number(item.msg_type),
+          fileName: item.file_name,
+          filePath: item.file_path,
+          fileFullPath: item.file_full_path,
         }));
 
         setMessages(formattedMessages);
@@ -65,12 +73,85 @@ function Chat() {
     });
   }, [messages, sending, loadingMessages]);
 
+  const handleAttachmentClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0] || null;
+    setSelectedFile(file);
+  };
+
+  const removeSelectedFile = () => {
+    setSelectedFile(null);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const getFileDownloadUrl = (filePath) => {
+    if (!filePath) return "#";
+
+    const cleanPath = filePath.replace(/\\/g, "/").replace(/\/+/g, "/");
+
+    if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
+      return cleanPath;
+    }
+
+    const fileBaseUrl =
+      import.meta.env.VITE_FILE_BASE_URL || "http://127.0.0.1:8000";
+
+    return `${fileBaseUrl.replace(/\/$/, "")}/${cleanPath.replace(/^\//, "")}`;
+  };
+
+  const renderMessageText = (item) => {
+    if (item.msgType === 2) {
+      return (
+        <a
+          href={getFileDownloadUrl(item.filePath)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="chat-file-link"
+          download
+        >
+          <span className="chat-file-icon">
+            <i className="fa-solid fa-file"></i>
+          </span>
+
+          <span className="chat-file-info">
+            <span className="chat-file-name">
+              {item.fileName || "Download file"}
+            </span>
+            <span className="chat-file-action">Click to download</span>
+          </span>
+
+          <span className="chat-file-download-icon">
+            <i className="fa-solid fa-download"></i>
+          </span>
+        </a>
+      );
+    }
+
+    if (item.sender === "assistant") {
+      return (
+        <div className="chat-markdown">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {item.text || ""}
+          </ReactMarkdown>
+        </div>
+      );
+    }
+
+    return <div className="chat-plain-text">{item.text}</div>;
+  };
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
 
     const userMessage = message.trim();
 
-    if (!userMessage) return;
+    if (!userMessage && !selectedFile) return;
 
     setErrorMessage("");
     setSending(true);
@@ -78,7 +159,13 @@ function Chat() {
     const temporaryUserMessage = {
       id: Date.now(),
       sender: "user",
-      text: userMessage,
+      text: selectedFile
+        ? `${userMessage || "Attachment"}\n📎 ${selectedFile.name}`
+        : userMessage,
+      msgType: selectedFile ? 2 : 1,
+      fileName: selectedFile ? selectedFile.name : null,
+      filePath: null,
+      fileFullPath: null,
     };
 
     setMessages((previousMessages) => [
@@ -89,10 +176,23 @@ function Chat() {
     setMessage("");
 
     try {
-      const response = await api.post("/chat/send", {
-        msg: userMessage,
-        msg_type: 1,
-        ai_instance_id: chatInstanceId,
+      const formData = new FormData();
+
+      formData.append("msg", userMessage);
+      formData.append("msg_type", selectedFile ? 2 : 1);
+
+      if (chatInstanceId) {
+        formData.append("ai_instance_id", chatInstanceId);
+      }
+
+      if (selectedFile) {
+        formData.append("file", selectedFile);
+      }
+
+      const response = await api.post("/chat/send", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
       const responseChatInstanceId =
@@ -112,8 +212,18 @@ function Chat() {
           id: Date.now() + 1,
           sender: "assistant",
           text: aiReply,
+          msgType: 1,
+          fileName: null,
+          filePath: null,
+          fileFullPath: null,
         },
       ]);
+
+      setSelectedFile(null);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
 
       setChatListRefreshKey((previousKey) => previousKey + 1);
 
@@ -191,7 +301,9 @@ function Chat() {
                     {item.sender === "user" ? "You" : "ChatFlow AI"}
                   </div>
 
-                  <div className="chat-message-bubble">{item.text}</div>
+                  <div className="chat-message-bubble">
+                    {renderMessageText(item)}
+                  </div>
                 </div>
               </div>
             ))}
@@ -218,20 +330,57 @@ function Chat() {
 
         <footer className="chat-footer">
           <form className="chat-form" onSubmit={handleSendMessage}>
-            <button type="button" className="chat-form-btn">
-              <i className="fa-solid fa-paperclip"></i>
-            </button>
-
             <input
-              type="text"
-              className="form-control chat-form-input"
-              placeholder="Message ChatFlow AI..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              type="file"
+              ref={fileInputRef}
+              style={{ display: "none" }}
+              onChange={handleFileChange}
               disabled={sending}
             />
 
-            <button type="submit" className="chat-send-btn" disabled={sending}>
+            <button
+              type="button"
+              className="chat-form-btn"
+              onClick={handleAttachmentClick}
+              disabled={sending}
+            >
+              <i className="fa-solid fa-paperclip"></i>
+            </button>
+
+            <div className="flex-grow-1">
+              {selectedFile && (
+                <div className="mb-2 small text-muted d-flex align-items-center gap-2">
+                  <span>
+                    <i className="fa-solid fa-paperclip me-1"></i>
+                    {selectedFile.name}
+                  </span>
+
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-link text-danger p-0"
+                    onClick={removeSelectedFile}
+                    disabled={sending}
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+
+              <input
+                type="text"
+                className="form-control chat-form-input"
+                placeholder="Message ChatFlow AI..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                disabled={sending}
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="chat-send-btn"
+              disabled={sending || (!message.trim() && !selectedFile)}
+            >
               {sending ? (
                 <span className="spinner-border spinner-border-sm"></span>
               ) : (

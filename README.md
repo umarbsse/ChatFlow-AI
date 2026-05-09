@@ -28,6 +28,7 @@ The project is organized as a monorepo with separate `frontend`, `backend`, `doc
 - React.js
 - Vite
 - React Router
+-npm install react-markdown remark-gfm
 - Axios
 - React Query
 - Laravel Echo / WebSocket-ready setup
