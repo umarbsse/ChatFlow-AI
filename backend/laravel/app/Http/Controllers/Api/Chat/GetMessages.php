@@ -53,6 +53,7 @@ class GetMessages extends Controller
                 'message' => 'Chat messages fetched successfully.',
                 'data' => [
                     'ai_instance_id' => $aiInstanceId,
+                    'instance_title' => $messages->first()->instance_title ?? null,
                     'messages' => $messages,
                 ],
                 'errors' => null,

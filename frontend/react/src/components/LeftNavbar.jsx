@@ -12,6 +12,7 @@ function LeftNavbar({ refreshKey }) {
   const [isChatsOpen, setIsChatsOpen] = useState(isChatRoute);
   const [chats, setChats] = useState([]);
   const [loadingChats, setLoadingChats] = useState(false);
+  const [deletingChatId, setDeletingChatId] = useState(null);
 
   const sidebarLinks = [
     {
@@ -92,6 +93,37 @@ function LeftNavbar({ refreshKey }) {
 
   const handleChatClick = (chatId) => {
     navigate(`/chat/${chatId}`);
+  };
+
+  const handleDeleteChat = async (e, chatId) => {
+    e.stopPropagation();
+
+    if (!chatId || deletingChatId) return;
+
+    const confirmed = window.confirm(
+      "Delete this chat? This will delete all messages in this chat."
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeletingChatId(chatId);
+
+      await api.delete(`/chat/instances/${chatId}`);
+
+      setChats((previousChats) =>
+        previousChats.filter((chat) => Number(chat.id) !== Number(chatId))
+      );
+
+      if (isActiveChat(chatId)) {
+        navigate("/chat", { replace: true });
+      }
+    } catch (error) {
+      console.log("Failed to delete chat:", error);
+      alert(error.response?.data?.message || "Failed to delete chat.");
+    } finally {
+      setDeletingChatId(null);
+    }
   };
 
   return (
@@ -181,12 +213,12 @@ function LeftNavbar({ refreshKey }) {
 
                     {!loadingChats &&
                       chats.map((chat) => (
-                        <button
+                        <div
                           key={`chat-${chat.id}`}
-                          type="button"
-                          className={`chat-list-item chat-dropdown-item ${
+                          className={`chat-list-item chat-dropdown-item chat-instance-row ${
                             isActiveChat(chat.id) ? "active" : ""
                           }`}
+                          role="button"
                           onClick={() => handleChatClick(chat.id)}
                         >
                           <span className="chat-list-icon">
@@ -204,7 +236,21 @@ function LeftNavbar({ refreshKey }) {
                               {chat.time || chat.added_at || ""}
                             </span>
                           </span>
-                        </button>
+
+                          <button
+                            type="button"
+                            className="chat-instance-delete-btn"
+                            onClick={(e) => handleDeleteChat(e, chat.id)}
+                            disabled={deletingChatId === chat.id}
+                            title="Delete chat"
+                          >
+                            {deletingChatId === chat.id ? (
+                              <span className="spinner-border spinner-border-sm"></span>
+                            ) : (
+                              <i className="fa-solid fa-trash"></i>
+                            )}
+                          </button>
+                        </div>
                       ))}
                   </div>
                 )}
