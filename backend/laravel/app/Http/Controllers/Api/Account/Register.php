@@ -3,53 +3,23 @@
 namespace App\Http\Controllers\Api\Account;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\Api\Account\RegisterRequest;
+use App\Actions\Account\RegisterUserAction;
+use App\Http\Resources\Api\Account\RegisteredUserResource;
 use Throwable;
 
 class Register extends Controller
 {
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(RegisterRequest $request, RegisterUserAction $registerUser): JsonResponse
     {
-        try {
-            $validator = Validator::make($request->all(), [
-                'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-                'password' => ['required', 'string', 'min:8', 'confirmed'],
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Validation failed.',
-                    'data' => null,
-                    'errors' => $validator->errors(),
-                ], 422);
-            }
-
-            $validated = $validator->validated();
-
-            $user = DB::transaction(function () use ($validated) {
-                return User::create([
-                    'name' => $validated['name'],
-                    'email' => $validated['email'],
-                    'password' => Hash::make($validated['password']),
-                ]);
-            });
-
+        try {            
+            $user = $registerUser->handle($request->validated());
             return response()->json([
                 'status' => true,
                 'message' => 'User registered successfully.',
                 'data' => [
-                    'user' => [
-                        'id' => $user->id,
-                        'name' => $user->name,
-                        'email' => $user->email,
-                    ],
+                    'user' => new RegisteredUserResource($user),
                 ],
                 'errors' => null,
             ], 201);
