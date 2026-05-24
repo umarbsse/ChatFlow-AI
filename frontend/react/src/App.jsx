@@ -6,9 +6,9 @@ import AppLayout from "./layouts/AppLayout";
 import Register from "./pages/account/register/Register";
 import Login from "./pages/account/login/Login";
 import ForgotPassword from "./pages/account/forgot-password/ForgotPassword";
-import AccountSettings from "./pages/account/AccountSettings";
-import ChangePassword from "./pages/account/ChangePassword";
-import Logout from "./pages/account/Logout";
+import AccountSettings from "./pages/account/account-settings/AccountSettings";
+import ChangePassword from "./pages/account/change-password/ChangePassword";
+import Logout from "./pages/account/logout/Logout";
 
 import Home from "./pages/home/Home";
 import Chat from "./pages/chat/Chat";
