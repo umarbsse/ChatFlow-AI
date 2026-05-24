@@ -2,77 +2,48 @@
 
 namespace App\Http\Controllers\Api\User;
 
+use App\Actions\User\ChangePasswordAction;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\User\ChangePasswordRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use Throwable;
 
 class ChangePassword extends Controller
 {
-    public function __invoke(Request $request): JsonResponse
-    {
-        try {
-            $user = $request->user();
+    public function __invoke(
+    ChangePasswordRequest $request,
+    ChangePasswordAction $changePasswordAction
+): JsonResponse {
+    try {
+        $result = $changePasswordAction->execute(
+            $request->user(),
+            $request->validated()
+        );
 
-            if (!$user) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Unauthenticated.',
-                    'data' => null,
-                    'errors' => [
-                        'auth' => ['User is not authenticated.'],
-                    ],
-                ], 401);
-            }
-
-            $validator = Validator::make($request->all(), [
-                'current_password' => ['required', 'string'],
-                'password' => ['required', 'string', 'min:8', 'confirmed'],
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Validation failed.',
-                    'data' => null,
-                    'errors' => $validator->errors(),
-                ], 422);
-            }
-
-            $validated = $validator->validated();
-
-            if (!Hash::check($validated['current_password'], $user->password)) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Current password is incorrect.',
-                    'data' => null,
-                    'errors' => [
-                        'current_password' => ['Current password is incorrect.'],
-                    ],
-                ], 401);
-            }
-
-            $user->update([
-                'password' => Hash::make($validated['password']),
-            ]);
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Password changed successfully.',
-                'data' => null,
-                'errors' => null,
-            ], 200);
-        } catch (Throwable $e) {
+        if (!$result['success']) {
             return response()->json([
                 'status' => false,
-                'message' => 'Something went wrong. Please try again.',
+                'message' => $result['message'],
                 'data' => null,
-                'errors' => [
-                    'server' => ['Internal server error.'],
-                ],
-            ], 500);
+                'errors' => $result['errors'],
+            ], $result['status_code']);
         }
+
+        return response()->json([
+            'status' => true,
+            'message' => $result['message'],
+            'data' => $result['data'],
+            'errors' => null,
+        ], $result['status_code']);
+    } catch (Throwable $e) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Something went wrong. Please try again.',
+            'data' => null,
+            'errors' => [
+                'server' => ['Internal server error.'],
+            ],
+        ], 500);
     }
+}
 }

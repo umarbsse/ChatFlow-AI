@@ -14,17 +14,6 @@ class GetUser extends Controller
         try {
             $user = $request->user();
 
-            if (!$user) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Unauthenticated.',
-                    'data' => null,
-                    'errors' => [
-                        'auth' => ['User is not authenticated.'],
-                    ],
-                ], 401);
-            }
-
             return response()->json([
                 'status' => true,
                 'message' => 'User fetched successfully.',
