@@ -13,6 +13,7 @@ import Logout from "./pages/account/logout/Logout";
 import Home from "./pages/home/Home";
 import Chat from "./pages/chat/Chat";
 import Dashboard from "./pages/dashboard/Dashboard";
+import OpenAIConfig from "./pages/config/openai-config/OpenAIConfig";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
             <Route path="/account-settings" element={<AccountSettings />} />
             <Route path="/change-password" element={<ChangePassword />} />
             <Route path="/logout" element={<Logout />} />
+            <Route path="/config/openai" element={<OpenAIConfig />} />
           </Route>
         </Route>
 

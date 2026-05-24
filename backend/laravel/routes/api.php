@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\Dashboard\DashboardStats;
 use App\Http\Controllers\Api\User\ChangePassword;
 use App\Http\Controllers\Api\User\GetUser;
 use App\Http\Controllers\Api\User\UpdateUser;
+use App\Http\Controllers\Api\Config\GetOpenAIConfig;
+use App\Http\Controllers\Api\Config\UpdateOpenAIConfig;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -65,4 +67,15 @@ Route::middleware('auth:sanctum')->group(function () {
     */
 
     Route::get('/dashboard', DashboardStats::class)->name('dashboard.stats');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Config openai Routes
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('config')->group(function () {
+        Route::get('/openai', GetOpenAIConfig::class)->name('config.openai.show');
+        Route::put('/openai', UpdateOpenAIConfig::class)->name('config.openai.update');
+    });
 });

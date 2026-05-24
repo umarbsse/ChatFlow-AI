@@ -29,12 +29,18 @@ function LeftNavbar({ refreshKey }) {
     },
     {
       id: 3,
+      title: "OpenAI Config",
+      icon: "fa-solid fa-gear",
+      path: "/config/openai",
+    },
+    {
+      id: 4,
       title: "Account Settings",
       icon: "fa-solid fa-user-gear",
       path: "/account-settings",
     },
     {
-      id: 4,
+      id: 5,
       title: "Change Password",
       icon: "fa-solid fa-lock",
       path: "/change-password",
