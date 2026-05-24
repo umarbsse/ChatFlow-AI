@@ -8,6 +8,12 @@ use Illuminate\Http\Request;
 
 class ChatInstanceService
 {
+    public function __construct(
+        private ChatTitleService $chatTitleService
+    ) {
+        //
+    }
+
     public function resolve(Request $request, User $user): array
     {
         if ($request->filled('ai_instance_id')) {
@@ -31,14 +37,16 @@ class ChatInstanceService
             ];
         }
 
-        $instance = get_chat_instance_id_laravel(
-            $user->id,
-            $request->input('msg')
-        );
+        $lastInstanceId = ChatMessage::where('user_id', $user->id)
+            ->max('ai_instance_id');
+
+        $aiInstanceId = $lastInstanceId ? $lastInstanceId + 1 : 1;
+
+        $aiInstanceTitle = $this->chatTitleService->createTitle($request);
 
         return [
-            'ai_instance_id' => $instance['instance_id'],
-            'instance_title' => $instance['instance_title'],
+            'ai_instance_id' => $aiInstanceId,
+            'instance_title' => $aiInstanceTitle,
         ];
     }
 }

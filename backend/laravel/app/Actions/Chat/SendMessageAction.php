@@ -2,30 +2,32 @@
 
 namespace App\Actions\Chat;
 
+use App\Events\ChatMessageSent;
 use App\Models\ChatMessage;
 use App\Models\User;
 use App\Services\Chat\ChatFileUploadService;
-use App\Services\Chat\OpenAIFileService;
-use App\Services\Chat\OpenAIChatService;
 use App\Services\Chat\ChatInstanceService;
-use App\Events\ChatMessageSent;
+use App\Services\OpenAI\OpenAIChatService;
+use App\Services\OpenAI\OpenAIFileService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class SendMessageAction
 {
     public function __construct(
-        private ChatFileUploadService $chatFileUploadService, 
+        private ChatFileUploadService $chatFileUploadService,
         private OpenAIFileService $openAIFileService,
         private OpenAIChatService $openAIChatService,
-        private ChatInstanceService $chatInstanceService) {
+        private ChatInstanceService $chatInstanceService
+    ) {
         //
     }
+
     public function execute(Request $request, User $user): array
     {
         return DB::transaction(function () use ($request, $user) {
-
             $instance = $this->chatInstanceService->resolve($request, $user);
+
             $aiInstanceId = $instance['ai_instance_id'];
             $aiInstanceTitle = $instance['instance_title'];
 
@@ -57,17 +59,16 @@ class SendMessageAction
             $response['instance_title'] = $aiInstanceTitle;
 
             event(new ChatMessageSent(
-            user: $user,
-            aiInstanceId: $aiInstanceId,
-            userMessage: $response['user_message'] ?? null,
-            aiMessage: $response['ai_message'] ?? null,
-            fileMessage: $response['file_message'] ?? null
-        ));
+                user: $user,
+                aiInstanceId: $aiInstanceId,
+                userMessage: $response['user_message'] ?? null,
+                aiMessage: $response['ai_message'] ?? null,
+                fileMessage: $response['file_message'] ?? null
+            ));
 
             return $response;
         });
     }
-
 
     private function handleFileMessage(
         Request $request,
@@ -180,7 +181,9 @@ class SendMessageAction
 
             'added_at' => now(),
         ]);
+
         $aiResponse = $this->openAIChatService->sendMessage(
+            $user,
             $userMsg,
             $aiInstanceId,
             true
