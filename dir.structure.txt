@@ -1,53 +1,301 @@
 ChatFlow-AI/
-├── backend/
-│   └── laravel/
-│       ├── app/
-│       │   ├── Helpers/
-│       │   │   └── ChatHelper.php
-│       │   ├── Http/
-│       │   │   └── Controllers/
-│       │   │       └── Api/
-│       │   │           ├── Auth/
-│       │   │           ├── Chat/
-│       │   │           │   ├── SendMessage.php
-│       │   │           │   ├── GetMessages.php
-│       │   │           │   ├── ChatList.php
-│       │   │           │   ├── DeleteMessage.php
-│       │   │           │   └── DeleteChatInstance.php
-│       │   │           └── Dashboard/
-│       │   │               └── DashboardStats.php
-│       │   └── Models/
-│       │       └── ChatMessage.php
-│       ├── config/
-│       ├── database/
-│       │   └── migrations/
-│       ├── routes/
-│       │   └── api.php
-│       ├── storage/
-│       │   └── app/public/chat_uploads/
-│       ├── composer.json
-│       └── .env
-│
-├── frontend/
-│   ├── src/
-│   │   ├── assets/
-│   │   │   └── css/
-│   │   │       ├── chat.css
-│   │   │       └── dashboard.css
-│   │   ├── components/
-│   │   │   ├── Header.jsx
-│   │   │   └── LeftNavbar.jsx
-│   │   ├── pages/
-│   │   │   ├── chat/
-│   │   │   │   └── Chat.jsx
-│   │   │   └── dashboard/
-│   │   │       └── Dashboard.jsx
-│   │   ├── services/
-│   │   │   └── api.js
-│   │   └── main.jsx
-│   ├── public/
-│   ├── package.json
-│   ├── vite.config.js
-│   └── .env
-│
-└── README.md
+|-- README.md
+|-- dir.structure.txt
+|-- backend/
+|   `-- laravel/
+|       |-- .editorconfig
+|       |-- .env
+|       |-- .env.example
+|       |-- .gitattributes
+|       |-- .gitignore
+|       |-- artisan
+|       |-- composer.json
+|       |-- composer.lock
+|       |-- package.json
+|       |-- phpunit.xml
+|       |-- README.md
+|       |-- vite.config.js
+|       |-- app/
+|       |   |-- Actions/
+|       |   |   |-- Account/
+|       |   |   |   |-- LoginUserAction.php
+|       |   |   |   `-- RegisterUserAction.php
+|       |   |   |-- Chat/
+|       |   |   |   |-- DeleteChatInstanceAction.php
+|       |   |   |   |-- DeleteMessageAction.php
+|       |   |   |   |-- GetChatListAction.php
+|       |   |   |   |-- GetMessagesAction.php
+|       |   |   |   `-- SendMessageAction.php
+|       |   |   |-- Config/
+|       |   |   |   |-- GetOpenAIConfigAction.php
+|       |   |   |   `-- UpdateOpenAIConfigAction.php
+|       |   |   |-- Dashboard/
+|       |   |   |   `-- GetDashboardStatsAction.php
+|       |   |   `-- User/
+|       |   |       |-- ChangePasswordAction.php
+|       |   |       `-- UpdateUserAction.php
+|       |   |-- Events/
+|       |   |   |-- ChatMessageSent.php
+|       |   |   |-- UserLoggedIn.php
+|       |   |   `-- UserRegistered.php
+|       |   |-- Http/
+|       |   |   |-- Controllers/
+|       |   |   |   |-- Controller.php
+|       |   |   |   `-- Api/
+|       |   |   |       |-- Account/
+|       |   |   |       |   |-- Login.php
+|       |   |   |       |   `-- Register.php
+|       |   |   |       |-- Chat/
+|       |   |   |       |   |-- ChatList.php
+|       |   |   |       |   |-- DeleteChatInstance.php
+|       |   |   |       |   |-- DeleteMessage.php
+|       |   |   |       |   |-- GetMessages.php
+|       |   |   |       |   `-- SendMessage.php
+|       |   |   |       |-- Config/
+|       |   |   |       |   |-- GetOpenAIConfig.php
+|       |   |   |       |   `-- UpdateOpenAIConfig.php
+|       |   |   |       |-- Dashboard/
+|       |   |   |       |   `-- DashboardStats.php
+|       |   |   |       `-- User/
+|       |   |   |           |-- ChangePassword.php
+|       |   |   |           |-- GetUser.php
+|       |   |   |           `-- UpdateUser.php
+|       |   |   |-- Requests/
+|       |   |   |   `-- Api/
+|       |   |   |       |-- Account/
+|       |   |   |       |   |-- LoginRequest.php
+|       |   |   |       |   `-- RegisterRequest.php
+|       |   |   |       |-- Chat/
+|       |   |   |       |   `-- SendMessageRequest.php
+|       |   |   |       |-- Config/
+|       |   |   |       |   `-- UpdateOpenAIConfigRequest.php
+|       |   |   |       `-- User/
+|       |   |   |           |-- ChangePasswordRequest.php
+|       |   |   |           `-- UpdateUserRequest.php
+|       |   |   `-- Resources/
+|       |   |       `-- Api/
+|       |   |           `-- Account/
+|       |   |               `-- RegisteredUserResource.php
+|       |   |-- Jobs/
+|       |   |   `-- LogChatMessageSentJob.php
+|       |   |-- Listeners/
+|       |   |   |-- LogChatMessageSent.php
+|       |   |   |-- LogUserLogin.php
+|       |   |   `-- SendWelcomeEmail.php
+|       |   |-- Models/
+|       |   |   |-- ChatMessage.php
+|       |   |   `-- User.php
+|       |   |-- Notifications/
+|       |   |   `-- WelcomeUserNotification.php
+|       |   |-- Providers/
+|       |   |   `-- AppServiceProvider.php
+|       |   `-- Services/
+|       |       |-- Chat/
+|       |       |   |-- ChatFileDeleteService.php
+|       |       |   |-- ChatFileUploadService.php
+|       |       |   |-- ChatHistoryService.php
+|       |       |   |-- ChatInstanceService.php
+|       |       |   |-- ChatListService.php
+|       |       |   |-- ChatMessageService.php
+|       |       |   |-- ChatTitleService.php
+|       |       |   |-- OpenAIChatService.php
+|       |       |   `-- OpenAIFileService.php
+|       |       |-- Config/
+|       |       |   `-- OpenAIEnvConfigService.php
+|       |       |-- Dashboard/
+|       |       |   `-- DashboardStatsService.php
+|       |       `-- OpenAI/
+|       |           |-- OpenAIChatService.php
+|       |           |-- OpenAIClient.php
+|       |           |-- OpenAIFileService.php
+|       |           `-- OpenAIResponseParser.php
+|       |-- bootstrap/
+|       |   |-- app.php
+|       |   |-- providers.php
+|       |   `-- cache/
+|       |       |-- .gitignore
+|       |       |-- packages.php
+|       |       `-- services.php
+|       |-- config/
+|       |   |-- app.php
+|       |   |-- auth.php
+|       |   |-- cache.php
+|       |   |-- database.php
+|       |   |-- filesystems.php
+|       |   |-- logging.php
+|       |   |-- mail.php
+|       |   |-- queue.php
+|       |   |-- sanctum.php
+|       |   |-- services.php
+|       |   `-- session.php
+|       |-- database/
+|       |   |-- .gitignore
+|       |   |-- database.sqlite
+|       |   |-- factories/
+|       |   |   `-- UserFactory.php
+|       |   |-- migrations/
+|       |   |   |-- 0001_01_01_000000_create_users_table.php
+|       |   |   |-- 0001_01_01_000001_create_cache_table.php
+|       |   |   |-- 0001_01_01_000002_create_jobs_table.php
+|       |   |   |-- 2026_05_07_194620_create_personal_access_tokens_table.php
+|       |   |   `-- 2026_05_08_192321_create_chat_messages_table.php
+|       |   `-- seeders/
+|       |       |-- DatabaseSeeder.php
+|       |       `-- UserSeeder.php
+|       |-- public/
+|       |   |-- .htaccess
+|       |   |-- favicon.ico
+|       |   |-- index.php
+|       |   `-- robots.txt
+|       |-- resources/
+|       |   |-- css/
+|       |   |   `-- app.css
+|       |   |-- js/
+|       |   |   |-- app.js
+|       |   |   `-- bootstrap.js
+|       |   `-- views/
+|       |       `-- welcome.blade.php
+|       |-- routes/
+|       |   |-- api.php
+|       |   |-- console.php
+|       |   `-- web.php
+|       |-- storage/
+|       |   |-- app/
+|       |   |   |-- .gitignore
+|       |   |   |-- private/
+|       |   |   |   `-- .gitignore
+|       |   |   `-- public/
+|       |   |       |-- .gitignore
+|       |   |       `-- chat_uploads/
+|       |   |           `-- runtime uploaded chat files
+|       |   |-- framework/
+|       |   |   |-- .gitignore
+|       |   |   |-- cache/
+|       |   |   |   |-- .gitignore
+|       |   |   |   `-- data/
+|       |   |   |       `-- .gitignore
+|       |   |   |-- sessions/
+|       |   |   |   `-- .gitignore
+|       |   |   |-- testing/
+|       |   |   |   `-- .gitignore
+|       |   |   `-- views/
+|       |   |       `-- .gitignore
+|       |   `-- logs/
+|       |       `-- .gitignore
+|       `-- tests/
+|           |-- TestCase.php
+|           |-- Feature/
+|           |   `-- ExampleTest.php
+|           `-- Unit/
+|               `-- ExampleTest.php
+`-- frontend/
+    `-- react/
+        |-- .env
+        |-- .gitignore
+        |-- eslint.config.js
+        |-- index.html
+        |-- package-lock.json
+        |-- package.json
+        |-- README.md
+        |-- vite.config.js
+        |-- public/
+        |   |-- favicon.svg
+        |   `-- icons.svg
+        `-- src/
+            |-- App.jsx
+            |-- main.jsx
+            |-- app/
+            |   `-- router/
+            |       `-- index.jsx
+            |-- assets/
+            |   |-- hero.png
+            |   |-- react.svg
+            |   |-- vite.svg
+            |   `-- css/
+            |       |-- chat.css
+            |       |-- dashboard.css
+            |       |-- home.css
+            |       `-- style.css
+            |-- components/
+            |   |-- Header.jsx
+            |   |-- LeftNavbar.jsx
+            |   `-- ProtectedRoute.jsx
+            |-- layouts/
+            |   `-- AppLayout.jsx
+            |-- pages/
+            |   |-- account/
+            |   |   |-- account-settings/
+            |   |   |   |-- AccountSettings.jsx
+            |   |   |   |-- AccountSettingsInput.jsx
+            |   |   |   |-- accountSettingsConstants.js
+            |   |   |   `-- useAccountSettingsForm.js
+            |   |   |-- change-password/
+            |   |   |   |-- ChangePassword.jsx
+            |   |   |   |-- ChangePasswordInput.jsx
+            |   |   |   |-- changePasswordConstants.js
+            |   |   |   `-- useChangePasswordForm.js
+            |   |   |-- forgot-password/
+            |   |   |   |-- ForgotPassword.jsx
+            |   |   |   |-- ForgotPasswordInput.jsx
+            |   |   |   |-- forgotPasswordConstants.js
+            |   |   |   `-- useForgotPasswordForm.js
+            |   |   |-- login/
+            |   |   |   |-- Login.jsx
+            |   |   |   |-- LoginInput.jsx
+            |   |   |   |-- loginConstants.js
+            |   |   |   `-- useLoginForm.js
+            |   |   |-- logout/
+            |   |   |   |-- Logout.jsx
+            |   |   |   |-- LogoutCard.jsx
+            |   |   |   |-- logoutConstants.js
+            |   |   |   `-- useLogout.js
+            |   |   `-- register/
+            |   |       |-- Register.jsx
+            |   |       |-- RegisterInput.jsx
+            |   |       |-- registerConstants.js
+            |   |       `-- useRegisterForm.js
+            |   |-- chat/
+            |   |   |-- Chat.jsx
+            |   |   |-- components/
+            |   |   |   |-- ChatFileMessage.jsx
+            |   |   |   |-- ChatFooter.jsx
+            |   |   |   |-- ChatInstanceTitle.jsx
+            |   |   |   |-- ChatLoading.jsx
+            |   |   |   |-- ChatMarkdown.jsx
+            |   |   |   |-- ChatMessage.jsx
+            |   |   |   |-- ChatThread.jsx
+            |   |   |   `-- ChatWelcome.jsx
+            |   |   |-- hooks/
+            |   |   |   `-- useChat.js
+            |   |   `-- utils/
+            |   |       `-- chatUtils.js
+            |   |-- config/
+            |   |   `-- openai-config/
+            |   |       |-- OpenAIConfig.jsx
+            |   |       |-- OpenAIConfigInput.jsx
+            |   |       |-- openAIConfigConstants.js
+            |   |       `-- useOpenAIConfigForm.js
+            |   |-- dashboard/
+            |   |   |-- Dashboard.jsx
+            |   |   |-- components/
+            |   |   |   |-- ChatAnalysis.jsx
+            |   |   |   |-- DailyChatsChart.jsx
+            |   |   |   |-- DashboardHeader.jsx
+            |   |   |   |-- DashboardLoading.jsx
+            |   |   |   |-- PerformanceOverview.jsx
+            |   |   |   |-- RecentActivity.jsx
+            |   |   |   `-- StatsGrid.jsx
+            |   |   `-- hooks/
+            |   |       `-- useDashboardData.js
+            |   `-- home/
+            |       |-- Home.jsx
+            |       |-- homeConstants.js
+            |       `-- components/
+            |           |-- CtaSection.jsx
+            |           |-- FeaturesSection.jsx
+            |           |-- HeroPreview.jsx
+            |           |-- HeroSection.jsx
+            |           |-- HomeNavbar.jsx
+            |           `-- TasksSection.jsx
+            `-- services/
+                `-- api.js
