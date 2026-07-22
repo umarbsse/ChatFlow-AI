@@ -35,12 +35,18 @@ function LeftNavbar({ refreshKey }) {
     },
     {
       id: 4,
+      title: "Add Vacancy",
+      icon: "fa-solid fa-briefcase",
+      path: "/Vacancy/add",
+    },
+    {
+      id: 5,
       title: "Account Settings",
       icon: "fa-solid fa-user-gear",
       path: "/account-settings",
     },
     {
-      id: 5,
+      id: 6,
       title: "Change Password",
       icon: "fa-solid fa-lock",
       path: "/change-password",

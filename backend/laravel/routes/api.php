@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\User\GetUser;
 use App\Http\Controllers\Api\User\UpdateUser;
 use App\Http\Controllers\Api\Config\GetOpenAIConfig;
 use App\Http\Controllers\Api\Config\UpdateOpenAIConfig;
+use App\Http\Controllers\Api\Vacancy\CreateVacancy;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -73,6 +74,17 @@ Route::middleware('auth:sanctum')->group(function () {
     | Config openai Routes
     |--------------------------------------------------------------------------
     */
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Vacancy Routes
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('vacancies')->group(function () {
+        Route::post('/', CreateVacancy::class)->name('vacancies.store');
+    });
 
     Route::prefix('config')->group(function () {
         Route::get('/openai', GetOpenAIConfig::class)->name('config.openai.show');
