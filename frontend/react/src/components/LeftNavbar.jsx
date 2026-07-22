@@ -9,7 +9,13 @@ function LeftNavbar({ refreshKey }) {
   const isChatRoute =
     location.pathname === "/chat" || location.pathname.startsWith("/chat/");
 
+  const isVacancyRoute =
+    location.pathname === "/Vacancy" ||
+    location.pathname === "/Vacancy/" ||
+    location.pathname.startsWith("/Vacancy/");
+
   const [isChatsOpen, setIsChatsOpen] = useState(isChatRoute);
+  const [isVacancyOpen, setIsVacancyOpen] = useState(isVacancyRoute);
   const [chats, setChats] = useState([]);
   const [loadingChats, setLoadingChats] = useState(false);
   const [deletingChatId, setDeletingChatId] = useState(null);
@@ -35,9 +41,9 @@ function LeftNavbar({ refreshKey }) {
     },
     {
       id: 4,
-      title: "Add Vacancy",
+      title: "Vacancy",
       icon: "fa-solid fa-briefcase",
-      path: "/Vacancy/add",
+      path: null,
     },
     {
       id: 5,
@@ -56,6 +62,12 @@ function LeftNavbar({ refreshKey }) {
   useEffect(() => {
     setIsChatsOpen(isChatRoute);
   }, [isChatRoute]);
+
+  useEffect(() => {
+    if (isVacancyRoute) {
+      setIsVacancyOpen(true);
+    }
+  }, [isVacancyRoute]);
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -264,6 +276,72 @@ function LeftNavbar({ refreshKey }) {
                           </button>
                         </div>
                       ))}
+                  </div>
+                )}
+              </div>
+            );
+          }
+
+          if (link.title === "Vacancy") {
+            return (
+              <div key={`nav-${link.id}`} className="chat-dropdown">
+                <button
+                  type="button"
+                  className={`chat-list-item ${isVacancyRoute ? "active" : ""}`}
+                  onClick={() => setIsVacancyOpen((previousValue) => !previousValue)}
+                  aria-expanded={isVacancyOpen}
+                >
+                  <span className="chat-list-icon">
+                    <i className={link.icon}></i>
+                  </span>
+
+                  <span className="chat-list-content">
+                    <span className="chat-list-title">{link.title}</span>
+                  </span>
+
+                  <span className="ms-auto">
+                    <i
+                      className={`fa-solid ${
+                        isVacancyOpen ? "fa-chevron-down" : "fa-chevron-right"
+                      }`}
+                    ></i>
+                  </span>
+                </button>
+
+                {isVacancyOpen && (
+                  <div className="chat-dropdown-menu">
+                    <button
+                      type="button"
+                      className={`chat-list-item chat-dropdown-item ${
+                        location.pathname === "/Vacancy/add" ? "active" : ""
+                      }`}
+                      onClick={() => navigate("/Vacancy/add")}
+                    >
+                      <span className="chat-list-icon">
+                        <i className="fa-solid fa-plus"></i>
+                      </span>
+                      <span className="chat-list-content">
+                        <span className="chat-list-title">Add Vacancy</span>
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`chat-list-item chat-dropdown-item ${
+                        location.pathname === "/Vacancy" ||
+                        location.pathname === "/Vacancy/"
+                          ? "active"
+                          : ""
+                      }`}
+                      onClick={() => navigate("/Vacancy")}
+                    >
+                      <span className="chat-list-icon">
+                        <i className="fa-solid fa-list"></i>
+                      </span>
+                      <span className="chat-list-content">
+                        <span className="chat-list-title">List Vacancies</span>
+                      </span>
+                    </button>
                   </div>
                 )}
               </div>

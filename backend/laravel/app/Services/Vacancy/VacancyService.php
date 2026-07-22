@@ -3,9 +3,17 @@
 namespace App\Services\Vacancy;
 
 use App\Models\Vacancy;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class VacancyService
 {
+    public function paginate(int $perPage = 20): LengthAwarePaginator
+    {
+        return Vacancy::query()
+            ->latest('id')
+            ->paginate($perPage);
+    }
+
     /**
      * Create a vacancy while preserving blank text inputs as empty strings.
      * Typed nullable database fields use null when the form is blank.

@@ -15,6 +15,7 @@ import Chat from "./pages/chat/Chat";
 import Dashboard from "./pages/dashboard/Dashboard";
 import OpenAIConfig from "./pages/config/openai-config/OpenAIConfig";
 import AddVacancy from "./pages/vacancy/add/AddVacancy";
+import VacancyList from "./pages/vacancy/list/VacancyList";
 
 function App() {
   return (
@@ -39,6 +40,8 @@ function App() {
             <Route path="/change-password" element={<ChangePassword />} />
             <Route path="/logout" element={<Logout />} />
             <Route path="/config/openai" element={<OpenAIConfig />} />
+            <Route path="/Vacancy" element={<VacancyList />} />
+            <Route path="/Vacancy/" element={<VacancyList />} />
             <Route path="/Vacancy/add" element={<AddVacancy />} />
           </Route>
         </Route>
