@@ -2,6 +2,8 @@
 
 namespace App\Services\OpenAI;
 
+use App\Models\Config;
+
 class OpenAIClient
 {
     private string $apiKey;
@@ -9,8 +11,8 @@ class OpenAIClient
 
     public function __construct()
     {
-        $this->apiKey = (string) env('OPENAI_API_KEY', '');
-        $this->timeout = (int) env('CHATGPT_CURL_TIMEOUT', 120);
+        $this->apiKey = (string) Config::value('OPENAI_API_KEY', '');
+        $this->timeout = (int) Config::value('CHATGPT_CURL_TIMEOUT', 120);
     }
 
     public function hasApiKey(): bool

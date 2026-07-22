@@ -2,6 +2,7 @@
 
 namespace App\Services\OpenAI;
 
+use App\Models\Config;
 use CURLFile;
 
 class OpenAIFileService
@@ -26,7 +27,7 @@ class OpenAIFileService
         $response = $this->openAIClient->postMultipart(
             'https://api.openai.com/v1/files',
             [
-                'purpose' => env('OPENAI_FILE_PURPOSE', 'assistants'),
+                'purpose' => Config::value('OPENAI_FILE_PURPOSE', 'assistants'),
                 'file' => new CURLFile($fullPath),
             ]
         );

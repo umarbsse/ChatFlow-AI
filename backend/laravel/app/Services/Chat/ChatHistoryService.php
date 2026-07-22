@@ -3,6 +3,7 @@
 namespace App\Services\Chat;
 
 use App\Models\ChatMessage;
+use App\Models\Config;
 
 class ChatHistoryService
 {
@@ -15,7 +16,7 @@ class ChatHistoryService
             return [];
         }
 
-        $historyLimit = (int) env('CHATGPT_HISTORY_LIMIT', 15);
+        $historyLimit = (int) Config::value('CHATGPT_HISTORY_LIMIT', 15);
 
         $messages = ChatMessage::query()
             ->where('user_id', $userId)
@@ -94,7 +95,7 @@ class ChatHistoryService
 
     private function applyReferenceLimit(array $history): array
     {
-        $referenceLimit = (int) env('CHATGPT_SEND_MSG_FOR_REFERENCE', 0);
+        $referenceLimit = (int) Config::value('CHATGPT_SEND_MSG_FOR_REFERENCE', 0);
 
         /*
          * 0 means use all loaded history.

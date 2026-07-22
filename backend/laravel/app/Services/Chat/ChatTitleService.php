@@ -2,6 +2,8 @@
 
 namespace App\Services\Chat;
 
+use App\Models\Config;
+
 use App\Services\OpenAI\OpenAIClient;
 use App\Services\OpenAI\OpenAIResponseParser;
 use Illuminate\Http\Request;
@@ -43,7 +45,7 @@ class ChatTitleService
         }
 
         $payload = [
-            'model' => env('OPENAI_TITLE_MODEL', env('OPENAI_MODEL', 'gpt-4.1-mini')),
+            'model' => Config::value('OPENAI_TITLE_MODEL', Config::value('OPENAI_MODEL', 'gpt-4.1-mini')),
             'input' => [
                 [
                     'role' => 'system',
@@ -64,8 +66,8 @@ class ChatTitleService
                     ],
                 ],
             ],
-            'temperature' => (float) env('CHATGPT_TITLE_TEMPERATURE', 0.2),
-            'max_output_tokens' => (int) env('CHATGPT_TITLE_MAX_TOKENS', 20),
+            'temperature' => (float) Config::value('CHATGPT_TITLE_TEMPERATURE', 0.2),
+            'max_output_tokens' => (int) Config::value('CHATGPT_TITLE_MAX_TOKENS', 20),
         ];
 
         $response = $this->openAIClient->postJson(

@@ -60,7 +60,7 @@ class ConfigSeeder extends Seeder
             [
                 'key' => 'CHATGPT_SEND_MSG_FOR_REFERENCE',
                 'value' => '0',
-                'type' => 'boolean',
+                'type' => 'integer',
             ],
             [
                 'key' => 'CHATGPT_TOOL_TYPE',

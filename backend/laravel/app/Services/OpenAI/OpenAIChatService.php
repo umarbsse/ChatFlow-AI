@@ -2,6 +2,7 @@
 
 namespace App\Services\OpenAI;
 
+use App\Models\Config;
 use App\Models\User;
 use App\Services\Chat\ChatHistoryService;
 
@@ -57,11 +58,11 @@ class OpenAIChatService
         }
 
         $system = [
-            'role' => env('CHATGPT_ROLE', 'system'),
+            'role' => Config::value('CHATGPT_ROLE', 'system'),
             'content' => [
                 [
                     'type' => 'input_text',
-                    'text' => env('CHATGPT_ROLE_CONTENT', 'You are a helpful assistant.'),
+                    'text' => Config::value('CHATGPT_ROLE_CONTENT', 'You are a helpful assistant.'),
                 ],
             ],
         ];
@@ -69,13 +70,13 @@ class OpenAIChatService
         $input = array_merge([$system], $chatHistory);
 
         $payload = [
-            'model' => env('OPENAI_MODEL', 'gpt-4.1-mini'),
+            'model' => Config::value('OPENAI_MODEL', 'gpt-4.1-mini'),
             'input' => $input,
-            'temperature' => (float) env('CHATGPT_TEMPERATURE', 0.2),
+            'temperature' => (float) Config::value('CHATGPT_TEMPERATURE', 0.2),
             'tools' => [
                 [
-                    'type' => env('CHATGPT_TOOL_TYPE', 'web_search'),
-                    'search_context_size' => env('CHATGPT_SEARCH_CONTEXT_SIZE', 'medium'),
+                    'type' => Config::value('CHATGPT_TOOL_TYPE', 'web_search'),
+                    'search_context_size' => Config::value('CHATGPT_SEARCH_CONTEXT_SIZE', 'medium'),
                 ],
             ],
         ];
