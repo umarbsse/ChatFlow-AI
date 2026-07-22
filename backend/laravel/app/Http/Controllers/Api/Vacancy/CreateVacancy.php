@@ -16,7 +16,7 @@ class CreateVacancy extends Controller
         CreateVacancyAction $createVacancyAction
     ): JsonResponse {
         try {
-            $vacancy = $createVacancyAction->execute($request->validated());
+            $vacancy = $createVacancyAction->execute($request->validated(), $request->user());
 
             return response()->json([
                 'status' => true,

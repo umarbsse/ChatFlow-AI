@@ -11,7 +11,8 @@ class VacancyCreated
     use Dispatchable, SerializesModels;
 
     public function __construct(
-        public Vacancy $vacancy
+        public Vacancy $vacancy,
+        public int $userId
     ) {
         //
     }
