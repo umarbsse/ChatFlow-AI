@@ -82,6 +82,16 @@ class ConfigSeeder extends Seeder
                 'value' => 'assistants',
                 'type' => 'string',
             ],
+            [
+                'key' => 'VACANCY_AI_PROMPT',
+                'value' => '',
+                'type' => 'text',
+            ],
+            [
+                'key' => 'VACANCY_ORIGINAL_RESUME_LATEX',
+                'value' => '',
+                'type' => 'text',
+            ],
         ];
 
         foreach ($configs as $config) {

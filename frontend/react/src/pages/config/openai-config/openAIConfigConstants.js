@@ -36,6 +36,8 @@ export const initialOpenAIConfigFormData = {
   CHATGPT_SEARCH_CONTEXT_SIZE: "",
   CHATGPT_CURL_TIMEOUT: "",
   OPENAI_FILE_PURPOSE: "",
+  VACANCY_AI_PROMPT: "",
+  VACANCY_ORIGINAL_RESUME_LATEX: "",
 };
 
 export const openAIConfigFields = [
@@ -137,3 +139,21 @@ export const openAIConfigFields = [
 export function normalizeOpenAIConfigResponse(responseData) {
   return responseData?.data?.config || responseData?.config || {};
 }
+export const vacancyConfigFields = [
+  {
+    name: "VACANCY_AI_PROMPT",
+    label: "AI Prompt",
+    type: "textarea",
+    icon: "fa-solid fa-wand-magic-sparkles",
+    placeholder: "Enter the AI prompt used for vacancy resume processing.",
+    rows: 8,
+  },
+  {
+    name: "VACANCY_ORIGINAL_RESUME_LATEX",
+    label: "Original Resume LaTeX",
+    type: "textarea",
+    icon: "fa-solid fa-file-code",
+    placeholder: "Paste the original resume LaTeX template used for vacancy processing.",
+    rows: 16,
+  },
+];

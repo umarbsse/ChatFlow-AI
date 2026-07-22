@@ -35,6 +35,8 @@ class UpdateOpenAIConfigRequest extends FormRequest
 
             'CHATGPT_CURL_TIMEOUT' => ['required', 'integer', 'min:1', 'max:10000'],
             'OPENAI_FILE_PURPOSE' => ['required', 'string', 'max:100'],
+            'VACANCY_AI_PROMPT' => ['nullable', 'string'],
+            'VACANCY_ORIGINAL_RESUME_LATEX' => ['nullable', 'string'],
         ];
     }
 

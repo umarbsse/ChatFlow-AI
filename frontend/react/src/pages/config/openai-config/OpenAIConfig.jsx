@@ -1,5 +1,8 @@
 import OpenAIConfigInput from "./OpenAIConfigInput";
-import { openAIConfigFields } from "./openAIConfigConstants";
+import {
+  openAIConfigFields,
+  vacancyConfigFields,
+} from "./openAIConfigConstants";
 import useOpenAIConfigForm from "./useOpenAIConfigForm";
 
 function OpenAIConfig() {
@@ -40,26 +43,48 @@ function OpenAIConfig() {
               )}
 
               <form onSubmit={handleSubmit}>
-                <div className="row">
-                  {openAIConfigFields.map((field) => (
-                    <div
-                      className={
-                        field.name === "OPENAI_API_KEY" ||
-                        field.name === "CHATGPT_ROLE_CONTENT"
-                          ? "col-12"
-                          : "col-md-6"
-                      }
+                <ConfigSection
+                  title="OpenAI Configuration"
+                  description="Models, credentials, chat behavior, tools, and request settings."
+                  icon="fa-solid fa-robot"
+                >
+                  <div className="row">
+                    {openAIConfigFields.map((field) => (
+                      <div
+                        className={
+                          field.name === "OPENAI_API_KEY" ||
+                          field.name === "CHATGPT_ROLE_CONTENT"
+                            ? "col-12"
+                            : "col-md-6"
+                        }
+                        key={field.name}
+                      >
+                        <OpenAIConfigInput
+                          field={field}
+                          value={formData[field.name] ?? ""}
+                          error={errors[field.name]}
+                          onChange={handleChange}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </ConfigSection>
+
+                <ConfigSection
+                  title="Vacancy Configuration"
+                  description="Prompt used for AI-assisted vacancy and resume processing."
+                  icon="fa-solid fa-briefcase"
+                >
+                  {vacancyConfigFields.map((field) => (
+                    <OpenAIConfigInput
                       key={field.name}
-                    >
-                      <OpenAIConfigInput
-                        field={field}
-                        value={formData[field.name] ?? ""}
-                        error={errors[field.name]}
-                        onChange={handleChange}
-                      />
-                    </div>
+                      field={field}
+                      value={formData[field.name] ?? ""}
+                      error={errors[field.name]}
+                      onChange={handleChange}
+                    />
                   ))}
-                </div>
+                </ConfigSection>
 
                 <div className="d-flex justify-content-end gap-2">
                   <button
@@ -95,6 +120,23 @@ function OpenAIConfig() {
         </div>
       </div>
     </section>
+  );
+}
+
+function ConfigSection({ title, description, icon, children }) {
+  return (
+    <div className="border rounded-4 p-3 p-md-4 mb-4">
+      <div className="d-flex align-items-start gap-3 mb-3">
+        <span className="account-settings-icon flex-shrink-0">
+          <i className={icon}></i>
+        </span>
+        <div>
+          <h5 className="fw-bold mb-1">{title}</h5>
+          <p className="text-muted mb-0">{description}</p>
+        </div>
+      </div>
+      {children}
+    </div>
   );
 }
 

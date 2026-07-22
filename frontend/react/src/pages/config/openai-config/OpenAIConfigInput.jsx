@@ -11,8 +11,10 @@ function OpenAIConfigInput({
     onChange,
   };
 
+  const isTextarea = field.type === "textarea" || field.name === "CHATGPT_ROLE_CONTENT";
+
   return (
-    <div className={field.name === "CHATGPT_ROLE_CONTENT" ? "mb-4" : "mb-3"}>
+    <div className={isTextarea ? "mb-4" : "mb-3"}>
       <label className="form-label fw-semibold">{field.label}</label>
 
       <div className="input-group">
@@ -29,11 +31,11 @@ function OpenAIConfigInput({
               </option>
             ))}
           </select>
-        ) : field.name === "CHATGPT_ROLE_CONTENT" ? (
+        ) : isTextarea ? (
           <textarea
             {...commonProps}
-            rows={4}
-            placeholder="You are a helpful assistant."
+            rows={field.rows || 4}
+            placeholder={field.placeholder || "Enter configuration value"}
           ></textarea>
         ) : (
           <input

@@ -23,6 +23,8 @@ class OpenAIEnvConfigService
         'CHATGPT_SEARCH_CONTEXT_SIZE' => 'string',
         'CHATGPT_CURL_TIMEOUT' => 'integer',
         'OPENAI_FILE_PURPOSE' => 'string',
+        'VACANCY_AI_PROMPT' => 'text',
+        'VACANCY_ORIGINAL_RESUME_LATEX' => 'text',
     ];
 
     public function getConfig(): array
