@@ -20,6 +20,7 @@ class Vacancy extends Model
         'ai_prompt',
         'compiled_ai_prompt',
         'resume_updated_latex_code',
+        'open_ai_raw_response',
         'resume_pdf_file_path',
         'resume_pdf_file_name',
         'ai_instance_id',

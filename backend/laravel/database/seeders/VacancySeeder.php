@@ -23,6 +23,7 @@ class VacancySeeder extends Seeder
                 'ai_prompt' => 'Tailor this resume for [job_description] using [resume_old_latex_code].',
                 'compiled_ai_prompt' => 'Tailor this resume for Example vacancy record. Replace or remove this seeded record as needed. using Example original resume LaTeX.',
                 'resume_updated_latex_code' => null,
+                'open_ai_raw_response' => null,
                 'resume_pdf_file_path' => null,
                 'resume_pdf_file_name' => null,
                 'ai_instance_id' => null,

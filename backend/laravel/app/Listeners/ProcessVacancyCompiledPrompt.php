@@ -49,8 +49,18 @@ class ProcessVacancyCompiledPrompt implements ShouldQueue
             return;
         }
 
-        // Do not overwrite a completed AI result if the listener is dispatched again manually.
-        if (trim((string) $vacancy->resume_updated_latex_code) !== '') {
+        // Do not call OpenAI again for an already completed vacancy. If this
+        // vacancy was processed before open_ai_raw_response existed, backfill it
+        // from the previously stored AI response and stop here.
+        $existingUpdatedResume = trim((string) $vacancy->resume_updated_latex_code);
+
+        if ($existingUpdatedResume !== '') {
+            if (trim((string) $vacancy->open_ai_raw_response) === '') {
+                $vacancy->update([
+                    'open_ai_raw_response' => $existingUpdatedResume,
+                ]);
+            }
+
             return;
         }
 
@@ -96,6 +106,7 @@ class ProcessVacancyCompiledPrompt implements ShouldQueue
 
             if ($openAISucceeded && $aiText !== '') {
                 $updates['resume_updated_latex_code'] = $aiText;
+                $updates['open_ai_raw_response'] = $aiText;
             }
 
             $vacancy->update($updates);
