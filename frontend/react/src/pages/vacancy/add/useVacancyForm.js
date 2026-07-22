@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../../services/api";
 import { initialVacancyFormData } from "./vacancyFormConstants";
 
@@ -15,6 +16,7 @@ function buildVacancyFormData(config = {}) {
 }
 
 function useVacancyForm() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState(initialVacancyFormData);
   const [defaultFormData, setDefaultFormData] = useState(initialVacancyFormData);
   const [loadingConfig, setLoadingConfig] = useState(true);
@@ -72,9 +74,10 @@ function useVacancyForm() {
     try {
       setSaving(true);
       const response = await api.post("/vacancies", formData);
-      setSuccessMessage(response.data?.message || "Vacancy created successfully.");
+      const message = response.data?.message || "Vacancy created successfully.";
+      setSuccessMessage(message);
       setFormData(defaultFormData);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      navigate("/Vacancy", { replace: true, state: { successMessage: message } });
     } catch (error) {
       if (error.response?.status === 422) {
         setErrors(error.response.data?.errors || {});

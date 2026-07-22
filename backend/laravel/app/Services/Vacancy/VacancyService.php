@@ -7,6 +7,11 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class VacancyService
 {
+    public function __construct(
+        private readonly VacancyPromptCompiler $promptCompiler
+    ) {
+    }
+
     public function paginate(int $perPage = 20): LengthAwarePaginator
     {
         return Vacancy::query()
@@ -20,15 +25,26 @@ class VacancyService
      */
     public function create(array $data): Vacancy
     {
+        $jobDescription = $this->text($data, 'job_description');
+        $originalResumeLatex = $this->text($data, 'resume_old_latex_code');
+        $aiPrompt = $this->text($data, 'ai_prompt');
+
+        $compiledAiPrompt = $this->promptCompiler->compile(
+            $aiPrompt,
+            $jobDescription,
+            $originalResumeLatex
+        );
+
         return Vacancy::create([
             'company_name' => $this->text($data, 'company_name'),
             'position_name' => $this->text($data, 'position_name'),
-            'job_description' => $this->text($data, 'job_description'),
+            'job_description' => $jobDescription,
             'job_url' => $this->text($data, 'job_url'),
             'location' => $this->text($data, 'location'),
             'employment_type' => $this->text($data, 'employment_type'),
-            'resume_old_latex_code' => $this->text($data, 'resume_old_latex_code'),
-            'ai_prompt' => $this->text($data, 'ai_prompt'),
+            'resume_old_latex_code' => $originalResumeLatex,
+            'ai_prompt' => $aiPrompt,
+            'compiled_ai_prompt' => $compiledAiPrompt,
             'resume_updated_latex_code' => $this->text($data, 'resume_updated_latex_code'),
             'resume_pdf_file_path' => $this->text($data, 'resume_pdf_file_path'),
             'resume_pdf_file_name' => $this->text($data, 'resume_pdf_file_name'),

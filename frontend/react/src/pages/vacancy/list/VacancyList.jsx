@@ -1,14 +1,18 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import api from "../../../services/api";
 import "./vacancyList.css";
 
 function VacancyList() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [vacancies, setVacancies] = useState([]);
   const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0 });
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState(
+    location.state?.successMessage || ""
+  );
 
   const loadVacancies = async (page = 1) => {
     try {
@@ -39,6 +43,10 @@ function VacancyList() {
 
   useEffect(() => {
     loadVacancies();
+
+    if (location.state?.successMessage) {
+      navigate(location.pathname, { replace: true, state: {} });
+    }
   }, []);
 
   const displayText = (value) => {
@@ -73,6 +81,19 @@ function VacancyList() {
             Add Vacancy
           </button>
         </div>
+
+        {successMessage && (
+          <div className="alert alert-success alert-dismissible fade show" role="alert">
+            <i className="fa-solid fa-circle-check me-2"></i>
+            {successMessage}
+            <button
+              type="button"
+              className="btn-close"
+              aria-label="Close"
+              onClick={() => setSuccessMessage("")}
+            ></button>
+          </div>
+        )}
 
         {errorMessage && (
           <div className="alert alert-danger d-flex justify-content-between align-items-center">

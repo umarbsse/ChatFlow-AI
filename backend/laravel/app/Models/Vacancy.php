@@ -18,6 +18,7 @@ class Vacancy extends Model
         'employment_type',
         'resume_old_latex_code',
         'ai_prompt',
+        'compiled_ai_prompt',
         'resume_updated_latex_code',
         'resume_pdf_file_path',
         'resume_pdf_file_name',
