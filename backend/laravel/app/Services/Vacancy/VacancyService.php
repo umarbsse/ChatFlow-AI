@@ -8,7 +8,8 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 class VacancyService
 {
     public function __construct(
-        private readonly VacancyPromptCompiler $promptCompiler
+        private readonly VacancyPromptCompiler $promptCompiler,
+        private readonly VacancyResumePdfService $resumePdfService
     ) {
     }
 
@@ -77,6 +78,7 @@ class VacancyService
 
     public function delete(Vacancy $vacancy): void
     {
+        $this->resumePdfService->deleteForVacancy($vacancy);
         $vacancy->delete();
     }
 

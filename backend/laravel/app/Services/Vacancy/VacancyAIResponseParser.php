@@ -7,14 +7,26 @@ use JsonException;
 class VacancyAIResponseParser
 {
     /**
-     * Extract the updated LaTeX document from the JSON returned by OpenAI.
+     * Parse the structured vacancy response returned by OpenAI.
+     *
+     * @return array{
+     *     updated_latex_code: ?string,
+     *     company_name: ?string,
+     *     position_name: ?string
+     * }
      */
-    public function extractUpdatedLatexCode(?string $rawResponse): ?string
+    public function extractVacancyData(?string $rawResponse): array
     {
+        $empty = [
+            'updated_latex_code' => null,
+            'company_name' => null,
+            'position_name' => null,
+        ];
+
         $rawResponse = trim((string) $rawResponse);
 
         if ($rawResponse === '') {
-            return null;
+            return $empty;
         }
 
         foreach ($this->jsonCandidates($rawResponse) as $candidate) {
@@ -28,14 +40,41 @@ class VacancyAIResponseParser
                 continue;
             }
 
-            $latex = $decoded['updated_latex_code'] ?? null;
-
-            if (is_string($latex) && trim($latex) !== '') {
-                return $latex;
-            }
+            return [
+                'updated_latex_code' => $this->nonEmptyString(
+                    $decoded['updated_latex_code'] ?? null
+                ),
+                'company_name' => $this->nonEmptyString(
+                    $decoded['company_name'] ?? null
+                ),
+                // Support both the requested field name and the key used by the
+                // current OpenAI response format.
+                'position_name' => $this->nonEmptyString(
+                    $decoded['position_name'] ?? $decoded['job_applied_for'] ?? null
+                ),
+            ];
         }
 
-        return null;
+        return $empty;
+    }
+
+    /**
+     * Extract only the updated LaTeX document from the OpenAI JSON response.
+     */
+    public function extractUpdatedLatexCode(?string $rawResponse): ?string
+    {
+        return $this->extractVacancyData($rawResponse)['updated_latex_code'];
+    }
+
+    private function nonEmptyString(mixed $value): ?string
+    {
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $value = trim($value);
+
+        return $value !== '' ? $value : null;
     }
 
     /**

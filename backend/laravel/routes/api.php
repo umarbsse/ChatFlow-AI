@@ -18,6 +18,8 @@ use App\Http\Controllers\Api\Vacancy\GetVacancyList;
 use App\Http\Controllers\Api\Vacancy\GetVacancy;
 use App\Http\Controllers\Api\Vacancy\UpdateVacancy;
 use App\Http\Controllers\Api\Vacancy\DeleteVacancy;
+use App\Http\Controllers\Api\Vacancy\ViewVacancyResumePdf;
+use App\Http\Controllers\Api\Vacancy\DownloadVacancyResumePdf;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -91,6 +93,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', CreateVacancy::class)->name('vacancies.store');
         Route::get('/{vacancy}', GetVacancy::class)->name('vacancies.show');
         Route::put('/{vacancy}', UpdateVacancy::class)->name('vacancies.update');
+        Route::get('/{vacancy}/resume-pdf/view', ViewVacancyResumePdf::class)->name('vacancies.resume-pdf.view');
+        Route::get('/{vacancy}/resume-pdf/download', DownloadVacancyResumePdf::class)->name('vacancies.resume-pdf.download');
         Route::delete('/{vacancy}', DeleteVacancy::class)->name('vacancies.destroy');
     });
 

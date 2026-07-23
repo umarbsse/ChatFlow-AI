@@ -25,6 +25,8 @@ class OpenAIEnvConfigService
         'OPENAI_FILE_PURPOSE' => 'string',
         'VACANCY_AI_PROMPT' => 'text',
         'VACANCY_ORIGINAL_RESUME_LATEX' => 'text',
+        'LATEX_BINARY' => 'string',
+        'LATEX_COMPILE_TIMEOUT' => 'integer',
     ];
 
     public function getConfig(): array

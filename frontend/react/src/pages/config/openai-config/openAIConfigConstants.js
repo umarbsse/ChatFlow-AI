@@ -38,6 +38,8 @@ export const initialOpenAIConfigFormData = {
   OPENAI_FILE_PURPOSE: "",
   VACANCY_AI_PROMPT: "",
   VACANCY_ORIGINAL_RESUME_LATEX: "",
+  LATEX_BINARY: "",
+  LATEX_COMPILE_TIMEOUT: "",
 };
 
 export const openAIConfigFields = [
@@ -155,5 +157,21 @@ export const vacancyConfigFields = [
     icon: "fa-solid fa-file-code",
     placeholder: "Paste the original resume LaTeX template used for vacancy processing.",
     rows: 16,
+  },
+  {
+    name: "LATEX_BINARY",
+    label: "LaTeX Binary Path",
+    type: "text",
+    icon: "fa-solid fa-terminal",
+    placeholder: "C:/Users/John/AppData/Local/Programs/MiKTeX/miktex/bin/x64/pdflatex.exe",
+  },
+  {
+    name: "LATEX_COMPILE_TIMEOUT",
+    label: "LaTeX Compile Timeout (seconds)",
+    type: "number",
+    icon: "fa-solid fa-stopwatch",
+    placeholder: "120",
+    min: "10",
+    max: "3600",
   },
 ];

@@ -7,6 +7,7 @@ use App\Events\VacancyCreated;
 use App\Models\User;
 use App\Models\Vacancy;
 use App\Services\Vacancy\VacancyAIResponseParser;
+use App\Services\Vacancy\VacancyResumePdfService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Http\Request;
 use Illuminate\Queue\InteractsWithQueue;
@@ -20,7 +21,8 @@ class ProcessVacancyCompiledPrompt implements ShouldQueue
 
     public function __construct(
         private readonly SendMessageAction $sendMessageAction,
-        private readonly VacancyAIResponseParser $responseParser
+        private readonly VacancyAIResponseParser $responseParser,
+        private readonly VacancyResumePdfService $resumePdfService
     ) {
     }
 
@@ -57,16 +59,28 @@ class ProcessVacancyCompiledPrompt implements ShouldQueue
         $existingRawResponse = trim((string) $vacancy->open_ai_raw_response);
 
         if ($existingRawResponse !== '') {
-            $existingLatex = $this->responseParser->extractUpdatedLatexCode(
+            $existingData = $this->responseParser->extractVacancyData(
                 $existingRawResponse
             );
+            $existingLatex = $existingData['updated_latex_code'];
 
             if ($existingLatex !== null) {
-                if ((string) $vacancy->resume_updated_latex_code !== $existingLatex) {
-                    $vacancy->update([
-                        'resume_updated_latex_code' => $existingLatex,
-                    ]);
+                $existingUpdates = [
+                    'resume_updated_latex_code' => $existingLatex,
+                ];
+
+                if ($existingData['company_name'] !== null) {
+                    $existingUpdates['company_name'] = $existingData['company_name'];
                 }
+
+                if ($existingData['position_name'] !== null) {
+                    $existingUpdates['position_name'] = $existingData['position_name'];
+                }
+
+                $vacancy->update($existingUpdates);
+                $vacancy->refresh();
+
+                $this->compileResumePdf($vacancy, $existingLatex);
 
                 return;
             }
@@ -122,10 +136,19 @@ class ProcessVacancyCompiledPrompt implements ShouldQueue
                 // Preserve the complete JSON response for auditing/debugging.
                 $updates['open_ai_raw_response'] = $aiText;
 
-                // Store only the decoded LaTeX document in the resume column.
-                $updatedLatexCode = $this->responseParser
-                    ->extractUpdatedLatexCode($aiText);
+                $parsedVacancyData = $this->responseParser
+                    ->extractVacancyData($aiText);
+                $updatedLatexCode = $parsedVacancyData['updated_latex_code'];
 
+                if ($parsedVacancyData['company_name'] !== null) {
+                    $updates['company_name'] = $parsedVacancyData['company_name'];
+                }
+
+                if ($parsedVacancyData['position_name'] !== null) {
+                    $updates['position_name'] = $parsedVacancyData['position_name'];
+                }
+
+                // Store only the decoded LaTeX document in the resume column.
                 if ($updatedLatexCode !== null) {
                     $updates['resume_updated_latex_code'] = $updatedLatexCode;
                 } else {
@@ -138,6 +161,14 @@ class ProcessVacancyCompiledPrompt implements ShouldQueue
             }
 
             $vacancy->update($updates);
+            $vacancy->refresh();
+
+            if (isset($updates['resume_updated_latex_code'])) {
+                $this->compileResumePdf(
+                    $vacancy,
+                    (string) $updates['resume_updated_latex_code']
+                );
+            }
 
             if (!$openAISucceeded) {
                 Log::error('OpenAI did not return a successful response for vacancy.', [
@@ -157,6 +188,18 @@ class ProcessVacancyCompiledPrompt implements ShouldQueue
                 'Vacancy compiled prompt processing failed.',
                 previous: $exception
             );
+        }
+    }
+
+    private function compileResumePdf(Vacancy $vacancy, string $latexCode): void
+    {
+        try {
+            $this->resumePdfService->compileAndStore($vacancy, $latexCode);
+        } catch (Throwable $exception) {
+            Log::error('Vacancy resume PDF generation failed.', [
+                'vacancy_id' => $vacancy->id,
+                'exception' => $exception,
+            ]);
         }
     }
 }

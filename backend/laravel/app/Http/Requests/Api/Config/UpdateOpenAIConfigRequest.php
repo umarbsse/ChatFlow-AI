@@ -37,6 +37,8 @@ class UpdateOpenAIConfigRequest extends FormRequest
             'OPENAI_FILE_PURPOSE' => ['required', 'string', 'max:100'],
             'VACANCY_AI_PROMPT' => ['nullable', 'string'],
             'VACANCY_ORIGINAL_RESUME_LATEX' => ['nullable', 'string'],
+            'LATEX_BINARY' => ['required', 'string', 'max:2048'],
+            'LATEX_COMPILE_TIMEOUT' => ['required', 'integer', 'min:10', 'max:3600'],
         ];
     }
 
@@ -56,6 +58,8 @@ class UpdateOpenAIConfigRequest extends FormRequest
             'CHATGPT_SEARCH_CONTEXT_SIZE.required' => 'Search context size is required.',
             'CHATGPT_CURL_TIMEOUT.required' => 'cURL timeout is required.',
             'OPENAI_FILE_PURPOSE.required' => 'OpenAI file purpose is required.',
+            'LATEX_BINARY.required' => 'LaTeX binary path is required.',
+            'LATEX_COMPILE_TIMEOUT.required' => 'LaTeX compile timeout is required.',
         ];
     }
 

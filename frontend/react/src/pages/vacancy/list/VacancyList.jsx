@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "../../../services/api";
 import VacancyModal from "./VacancyModal";
+import VacancyPdfModal from "./VacancyPdfModal";
 import "./vacancyList.css";
 
 const normalizeVacancy = (vacancy = {}) => ({
@@ -31,6 +32,8 @@ function VacancyList() {
   const [modalError, setModalError] = useState("");
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [pdfAction, setPdfAction] = useState({ id: null, type: null });
+  const [pdfViewer, setPdfViewer] = useState({ open: false, url: "", title: "" });
 
   const loadVacancies = async (page = 1) => {
     try {
@@ -86,6 +89,55 @@ function VacancyList() {
     finally { setDeletingId(null); }
   };
 
+
+  const closePdfViewer = () => {
+    setPdfViewer((current) => {
+      if (current.url) URL.revokeObjectURL(current.url);
+      return { open: false, url: "", title: "" };
+    });
+  };
+
+  const openPdfBlob = async (vacancy, type) => {
+    try {
+      setPdfAction({ id: vacancy.id, type });
+      setErrorMessage("");
+
+      const response = await api.get(
+        `/vacancies/${vacancy.id}/resume-pdf/${type}`,
+        { responseType: "blob" }
+      );
+
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+
+      if (type === "view") {
+        setPdfViewer((current) => {
+          if (current.url) URL.revokeObjectURL(current.url);
+          return {
+            open: true,
+            url,
+            title: vacancy.resume_pdf_file_name || `vacancy-${vacancy.id}-resume.pdf`,
+          };
+        });
+      } else {
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = vacancy.resume_pdf_file_name || `vacancy-${vacancy.id}-resume.pdf`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+    } catch (error) {
+      setErrorMessage(
+        error.response?.data?.message ||
+          "The resume PDF is not available or could not be opened."
+      );
+    } finally {
+      setPdfAction({ id: null, type: null });
+    }
+  };
+
   const displayText = (value) => String(value ?? "").trim() || "—";
   const formatDate = (value) => { if (!value) return "—"; const date = new Date(value); return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString(); };
 
@@ -103,11 +155,32 @@ function VacancyList() {
         <div className="vacancy-list-card">
           <div className="vacancy-list-card-top"><div><h5 className="fw-bold mb-1">Vacancy List</h5><p className="text-muted mb-0">{pagination.total || 0} record{pagination.total === 1 ? "" : "s"}</p></div></div>
           {loading ? <div className="vacancy-list-state"><span className="spinner-border text-primary mb-3" /><span>Loading vacancies...</span></div> : vacancies.length === 0 ? <div className="vacancy-list-state"><i className="fa-regular fa-folder-open" /><h5 className="fw-bold mt-3 mb-2">No vacancies found</h5><button type="button" className="btn btn-primary rounded-pill px-4" onClick={() => navigate("/Vacancy/add")}>Add Vacancy</button></div> : <>
-            <div className="table-responsive"><table className="table vacancy-table align-middle mb-0"><thead><tr><th>ID</th><th>Company</th><th>Position</th><th>Job Description</th><th>Status</th><th>Apply Date</th><th>AI Instance</th><th>Created</th><th>Actions</th></tr></thead><tbody>
-              {vacancies.map((vacancy) => <tr key={vacancy.id}><td className="fw-semibold">#{vacancy.id}</td><td>{displayText(vacancy.company_name)}</td><td>{displayText(vacancy.position_name)}</td><td><div className="vacancy-description-cell">{displayText(vacancy.job_description)}</div></td><td><span className="vacancy-status-badge">{displayText(vacancy.status)}</span></td><td>{formatDate(vacancy.apply_date)}</td><td>{displayText(vacancy.ai_instance_id)}</td><td>{formatDate(vacancy.created_at)}</td><td><div className="vacancy-actions">
-                <button className="btn btn-sm btn-outline-primary" disabled={modalLoading} onClick={() => fetchVacancy(vacancy.id, "view")} title="View"><i className="fa-regular fa-eye" /></button>
-                <button className="btn btn-sm btn-outline-secondary" disabled={modalLoading} onClick={() => fetchVacancy(vacancy.id, "edit")} title="Update"><i className="fa-regular fa-pen-to-square" /></button>
-                <button className="btn btn-sm btn-outline-danger" disabled={deletingId === vacancy.id} onClick={() => deleteVacancy(vacancy)} title="Delete">{deletingId === vacancy.id ? <span className="spinner-border spinner-border-sm" /> : <i className="fa-regular fa-trash-can" />}</button>
+            <div className="table-responsive"><table className="table vacancy-table align-middle mb-0"><thead><tr><th>ID</th><th>Company</th><th>Position</th><th>Created</th><th>Resume PDF</th><th>Actions</th></tr></thead><tbody>
+              {vacancies.map((vacancy) => <tr key={vacancy.id}><td className="fw-semibold">#{vacancy.id}</td><td>{displayText(vacancy.company_name)}</td><td>{displayText(vacancy.position_name)}</td><td>{formatDate(vacancy.created_at)}</td><td><div className="vacancy-pdf-actions">
+                {vacancy.resume_pdf_file_path ? (
+                  <>
+                    <button
+                      className="btn btn-sm btn-outline-success"
+                      disabled={pdfAction.id === vacancy.id}
+                      onClick={() => openPdfBlob(vacancy, "view")}
+                      title="View generated PDF"
+                    >
+                      {pdfAction.id === vacancy.id && pdfAction.type === "view" ? <span className="spinner-border spinner-border-sm" /> : <><i className="fa-regular fa-file-pdf me-1" />View</>}
+                    </button>
+                    <button
+                      className="btn btn-sm btn-outline-success"
+                      disabled={pdfAction.id === vacancy.id}
+                      onClick={() => openPdfBlob(vacancy, "download")}
+                      title="Download generated PDF"
+                    >
+                      {pdfAction.id === vacancy.id && pdfAction.type === "download" ? <span className="spinner-border spinner-border-sm" /> : <><i className="fa-solid fa-download me-1" />Download</>}
+                    </button>
+                  </>
+                ) : <span className="text-muted small">Not available</span>}
+              </div></td><td><div className="vacancy-actions">
+                <button className="btn btn-sm btn-outline-primary" disabled={modalLoading} onClick={() => fetchVacancy(vacancy.id, "view")} title="View vacancy"><i className="fa-regular fa-eye" /></button>
+                <button className="btn btn-sm btn-outline-secondary" disabled={modalLoading} onClick={() => fetchVacancy(vacancy.id, "edit")} title="Update vacancy"><i className="fa-regular fa-pen-to-square" /></button>
+                <button className="btn btn-sm btn-outline-danger" disabled={deletingId === vacancy.id} onClick={() => deleteVacancy(vacancy)} title="Delete vacancy">{deletingId === vacancy.id ? <span className="spinner-border spinner-border-sm" /> : <i className="fa-regular fa-trash-can" />}</button>
               </div></td></tr>)}
             </tbody></table></div>
             {pagination.last_page > 1 && <div className="vacancy-pagination"><button className="btn btn-light" disabled={pagination.current_page <= 1 || loading} onClick={() => loadVacancies(pagination.current_page - 1)}>Previous</button><span>Page {pagination.current_page} of {pagination.last_page}</span><button className="btn btn-light" disabled={pagination.current_page >= pagination.last_page || loading} onClick={() => loadVacancies(pagination.current_page + 1)}>Next</button></div>}
@@ -115,6 +188,7 @@ function VacancyList() {
         </div>
       </div>
       <VacancyModal mode={modalMode} vacancy={selectedVacancy} form={editForm} setForm={setEditForm} saving={saving} error={modalError} onClose={closeModal} onSave={updateVacancy} />
+      <VacancyPdfModal open={pdfViewer.open} url={pdfViewer.url} title={pdfViewer.title} onClose={closePdfViewer} />
     </section>
   );
 }

@@ -42,6 +42,8 @@ function OpenAIConfigInput({
             {...commonProps}
             type={field.type}
             step={field.step}
+            min={field.min}
+            max={field.max}
             placeholder={field.placeholder}
           />
         )}

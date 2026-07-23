@@ -35,15 +35,15 @@ function LeftNavbar({ refreshKey }) {
     },
     {
       id: 3,
-      title: "OpenAI Config",
-      icon: "fa-solid fa-gear",
-      path: "/config/openai",
-    },
-    {
-      id: 4,
       title: "Vacancy",
       icon: "fa-solid fa-briefcase",
       path: null,
+    },
+    {
+      id: 4,
+      title: "Config",
+      icon: "fa-solid fa-gear",
+      path: "/config/openai",
     },
     {
       id: 5,
