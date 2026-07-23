@@ -6,6 +6,7 @@ use App\Actions\Chat\SendMessageAction;
 use App\Events\VacancyCreated;
 use App\Models\User;
 use App\Models\Vacancy;
+use App\Services\Vacancy\VacancyAIResponseParser;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Http\Request;
 use Illuminate\Queue\InteractsWithQueue;
@@ -18,7 +19,8 @@ class ProcessVacancyCompiledPrompt implements ShouldQueue
     use InteractsWithQueue;
 
     public function __construct(
-        private readonly SendMessageAction $sendMessageAction
+        private readonly SendMessageAction $sendMessageAction,
+        private readonly VacancyAIResponseParser $responseParser
     ) {
     }
 
@@ -49,18 +51,30 @@ class ProcessVacancyCompiledPrompt implements ShouldQueue
             return;
         }
 
-        // Do not call OpenAI again for an already completed vacancy. If this
-        // vacancy was processed before open_ai_raw_response existed, backfill it
-        // from the previously stored AI response and stop here.
-        $existingUpdatedResume = trim((string) $vacancy->resume_updated_latex_code);
+        // If a raw response already exists, normalize the resume field from it
+        // without calling OpenAI again. This also repairs records created by the
+        // previous implementation, which stored the whole JSON in both columns.
+        $existingRawResponse = trim((string) $vacancy->open_ai_raw_response);
 
-        if ($existingUpdatedResume !== '') {
-            if (trim((string) $vacancy->open_ai_raw_response) === '') {
-                $vacancy->update([
-                    'open_ai_raw_response' => $existingUpdatedResume,
-                ]);
+        if ($existingRawResponse !== '') {
+            $existingLatex = $this->responseParser->extractUpdatedLatexCode(
+                $existingRawResponse
+            );
+
+            if ($existingLatex !== null) {
+                if ((string) $vacancy->resume_updated_latex_code !== $existingLatex) {
+                    $vacancy->update([
+                        'resume_updated_latex_code' => $existingLatex,
+                    ]);
+                }
+
+                return;
             }
+        }
 
+        // A non-empty resume with no parseable raw response is treated as an
+        // already completed/manual record and must not trigger another AI call.
+        if (trim((string) $vacancy->resume_updated_latex_code) !== '') {
             return;
         }
 
@@ -105,8 +119,22 @@ class ProcessVacancyCompiledPrompt implements ShouldQueue
             ];
 
             if ($openAISucceeded && $aiText !== '') {
-                $updates['resume_updated_latex_code'] = $aiText;
+                // Preserve the complete JSON response for auditing/debugging.
                 $updates['open_ai_raw_response'] = $aiText;
+
+                // Store only the decoded LaTeX document in the resume column.
+                $updatedLatexCode = $this->responseParser
+                    ->extractUpdatedLatexCode($aiText);
+
+                if ($updatedLatexCode !== null) {
+                    $updates['resume_updated_latex_code'] = $updatedLatexCode;
+                } else {
+                    Log::warning('OpenAI vacancy response did not contain a valid updated_latex_code value.', [
+                        'vacancy_id' => $vacancy->id,
+                        'ai_instance_id' => $aiInstanceId,
+                        'chat_message_id' => $aiMessage?->id,
+                    ]);
+                }
             }
 
             $vacancy->update($updates);
